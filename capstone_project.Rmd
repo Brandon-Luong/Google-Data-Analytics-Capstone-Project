@@ -1,0 +1,526 @@
+---
+title: 'Google Data Analytics Capstone Project'
+subtitle: 'Case Study 2: How Can a Wellness Technology Company Play It Smart?'
+author: "Brandon Luong"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+---
+# Introduction
+
+As part of the Google Data Analytics Program, I am tasked with completing a Capstone case study. I have chosen to do this project in R because the dataset file size is too large to comfortably work in spreadsheets (Excel/Google Sheets). This project can be done in SQL, but R has many handy packages such as tidyverse for data cleaning and analysis.
+
+I am part of the marketing analytics team at Bellabeat, a high-tech manufacturer of health-focused products for women. Bellabeat is a small successful company but has the potential for growth in the global smart device market. Urška Sršen believes that analyzing smart fitness data could help with this growth and unlock new opportunities for the company.
+
+The Bellabeat Products:
+
+- Bellabeat App: Main smartphone app that tracks all health-related data and connects to the other products.
+- Leaf: Device tracker that records activity, sleep, and stress.
+- Time: Watch that has the looks of a watch and the functionality of the Leaf.
+- Spring: Water bottle that tracks daily water intake.
+- Bellabeat Membership: Subscription-based membership program.
+
+# Ask
+
+Primary stakeholders:
+
+- Urška Sršen: Cofounder and Chief Creative Officer
+- Sando Mur: Cofounder and key member of the Bellabeat executive team
+
+Secondary stakeholders:
+
+- Bellabeat marketing analytics team: A team of data analysts responsible for collecting, analyzing, and reporting data that helps guide Bellabeat’s marketing strategy.
+
+Main questions to answer in this analysis:
+
+1. What are some trends in smart device usage?
+2. How could these trends apply to Bellabeat customers?
+3. How could these trends help influence Bellabeat marketing strategy?
+
+Main deliverables (ie. objectives) to report:
+
+1. A clear summary of the business task
+2. A description of all data sources used
+3. Documentation of any cleaning or manipulation of data
+4. A summary of your analysis
+5. Supporting visualizations and key findings
+6. Your top high-level content recommendations based on your analysis
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**1. A clear summary of the business task:**
+
+Analyze smart device usage data for trends and insights and apply the new-found knowledge to one Bellabeat product, presenting high-level recommendations for how these trends can improve Bellabeat's marketing strategy.
+
+</div>
+
+# Prepare
+
+Dataset:
+
+- [Kaggle Fitbit Fitness Tracker Data](https://www.kaggle.com/arashnic/fitbit "Fitbit Fitness Tracker Data"), by Mobius
+
+License:
+
+- CC0: Public Domain
+
+Storage:
+
+- The data is originally stored in 18 csv files on Kaggle.
+- It is then downloaded and stored locally on my computer for analysis.
+
+## Load libraries
+
+```{r Load libraries}
+library(tidyverse) # Data science package
+library(janitor) # Data cleaning
+library(skimr) # Viewing
+```
+
+## Import csv files
+
+```{r Import csv files, message=FALSE, warning=FALSE}
+# Per Day
+daily_act <- read_csv('dailyActivity_merged.csv') # Use
+daily_cal <- read_csv('dailyCalories_merged.csv')
+daily_intense <- read_csv('dailyIntensities_merged.csv')
+daily_steps <- read_csv('dailySteps_merged.csv')
+daily_sleep <- read_csv('sleepDay_merged.csv') # Use
+# Per Hour
+hourly_cal <-read_csv('hourlyCalories_merged.csv')
+hourly_intense <- read_csv('hourlyIntensities_merged.csv')
+hourly_steps <- read_csv('hourlySteps_merged.csv')
+# Per Minute
+min_cal_narrow <- read_csv('minuteCaloriesNarrow_merged.csv')
+min_cal_wide <- read_csv('minuteCaloriesWide_merged.csv')
+min_intense_narrow <- read_csv('minuteIntensitiesNarrow_merged.csv')
+min_intense_wide <- read_csv('minuteIntensitiesWide_merged.csv')
+min_steps_narrow <- read_csv('minuteStepsNarrow_merged.csv')
+min_steps_wide <- read_csv('minuteStepsWide_merged.csv')
+min_sleep <- read_csv('minuteSleep_merged.csv')
+min_met_narrow <- read_csv('minuteMETsNarrow_merged.csv')
+# Per Second
+sec_heartrate <- read_csv('heartrate_seconds_merged.csv')
+# Other
+weight_log <- read_csv('weightLogInfo_merged.csv') # Use
+```
+
+Assumptions:
+
+- The data seems to be broken up into daily, hourly, per minute, per second, and other categories.
+- Because I want to analyze general trends, I may want to just focus on the daily files for trends over the course of the month.
+- I may drop the hourly, per minute, and per second files as they may capture such a small time interval per observation that it may not be useful for my particular analysis.
+- Some files may just be repeats of the same data but in different formats (eg. daily_cal vs hourly_cal, min_intense_narrow vs min_intense_wide) so I may be able to just pick 1 and drop the others.
+
+## Exploratory Data Analysis
+
+Let's start with these 5 daily csv files:
+
+- `daily_act`
+- `daily_cal`
+- `daily_intense`
+- `daily_steps`
+- `daily_sleep`
+
+```{r daily_act head}
+head(daily_act)
+```
+```{r daily_act column names}
+colnames(daily_act)
+```
+```{r daily_cal head}
+head(daily_cal)
+```
+```{r}
+colnames(daily_cal)
+```
+```{r}
+# Calculate the number of differing values in daily_cal
+diff <- daily_cal
+diff$Id <- ifelse(daily_act$Id != daily_cal$Id, 1, 0)
+diff$ActivityDay <- ifelse(daily_act$ActivityDate != daily_cal$ActivityDay, 1, 0)
+diff$Calories <- ifelse(daily_act$Calories != daily_cal$Calories, 1, 0)
+colSums(diff)
+```
+```{r}
+head(daily_intense)
+```
+```{r}
+colnames(daily_intense)
+```
+```{r}
+# Calculate the number of differing values in daily_intense
+diff <- daily_intense
+diff$Id <- ifelse(daily_act$Id != daily_intense$Id, 1, 0)
+diff$ActivityDay <- ifelse(daily_act$ActivityDate != daily_intense$ActivityDay, 1, 0)
+diff$SedentaryMinutes <- ifelse(daily_act$SedentaryMinutes != daily_intense$SedentaryMinutes, 1, 0)
+diff$LightlyActiveMinutes <- ifelse(daily_act$LightlyActiveMinutes != daily_intense$LightlyActiveMinutes, 1, 0)
+diff$FairlyActiveMinutes <- ifelse(daily_act$FairlyActiveMinutes != daily_intense$FairlyActiveMinutes, 1, 0)
+diff$VeryActiveMinutes <- ifelse(daily_act$VeryActiveMinutes != daily_intense$VeryActiveMinutes, 1, 0)
+diff$SedentaryActiveDistance <- ifelse(daily_act$SedentaryActiveDistance != daily_intense$SedentaryActiveDistance, 1, 0)
+diff$LightActiveDistance <- ifelse(daily_act$LightActiveDistance != daily_intense$LightActiveDistance, 1, 0)
+diff$ModeratelyActiveDistance <- ifelse(daily_act$ModeratelyActiveDistance != daily_intense$ModeratelyActiveDistance, 1, 0)
+diff$VeryActiveDistance <- ifelse(daily_act$VeryActiveDistance != daily_intense$VeryActiveDistance, 1, 0)
+colSums(diff)
+```
+```{r}
+head(daily_steps)
+```
+```{r}
+colnames(daily_steps)
+```
+```{r}
+# Calculate the number of differing values in daily_steps
+diff <- daily_steps
+diff$Id <- ifelse(daily_act$Id != daily_steps$Id, 1, 0)
+diff$ActivityDay <- ifelse(daily_act$ActivityDate != daily_steps$ActivityDay, 1, 0)
+diff$StepTotal <- ifelse(daily_act$TotalSteps != daily_steps$StepTotal, 1, 0)
+colSums(diff)
+```
+```{r}
+head(daily_sleep)
+```
+```{r}
+colnames(daily_sleep)
+```
+```{r}
+n_distinct(daily_sleep$Id)
+n_distinct(daily_sleep$SleepDay)
+table(daily_sleep$SleepDay)
+```
+```{r}
+n_distinct(daily_act$Id)
+n_distinct(daily_act$ActivityDate)
+unique(daily_act$ActivityDate)
+table(daily_act$ActivityDate)
+```
+With 0 differences in `daily_act` vs these 3 data, the following files can be safely dropped from the analysis:
+
+- `daily_cal`
+- `daily_intense`
+- `daily_steps`
+
+```{r}
+# Remove data frames from R environment
+rm(
+  daily_cal,
+  daily_intense,
+  daily_steps,
+  diff # dummy variable
+)
+```
+
+However, `daily_sleep` is not contained in `daily_act` so it can not be safely dropped. 
+
+- There are only 24 unique IDs meaning it is missing some users.
+- Not all sleep days are recorded with equal frequency.
+
+Looking at `daily_act`:
+
+- There are 33 unique IDs corresponding to the individual users - the dataset description only notes 30 users. ~30 users is a small sample size and data may be prone to bias.
+- There are 31 unique dates corresponding to 1 month of data from April 12, 2016 - May 12, 2016. This data is 5 years old and may be outdated and unreliable.
+
+Now let's look at the 3 hourly csv files:
+
+- `hourly_cal`
+- `hourly_intense`
+- `hourly_steps`
+
+```{r}
+head(hourly_cal)
+```
+```{r}
+colnames(hourly_cal)
+```
+```{r}
+head(hourly_intense)
+```
+```{r}
+colnames(hourly_intense)
+```
+```{r}
+head(hourly_steps)
+```
+```{r}
+colnames(hourly_steps)
+```
+
+These data have already been recorded under a daily metric, so the hourly metric is not needed. Confirming my assumption that the hourly captures per hour observations and isn't too helpful for my particular analysis, I will drop these files.
+
+```{r}
+# Remove data frames from R environment
+rm(
+  hourly_cal,
+  hourly_intense,
+  hourly_steps
+)
+```
+
+To confirm that the minute files are per minute observations similar to the hourly files, let's look at the 8 min files:
+
+- `min_cal_narrow`
+- `min_cal_wide`
+- `min_intense_narrow`
+- `min_intense_wide`
+- `min_steps_narrow`
+- `min_steps_wide`
+- `min_sleep`
+- `min_met_narrow`
+
+```{r}
+head(min_cal_narrow)
+```
+```{r}
+head(min_cal_wide)
+```
+```{r}
+head(min_intense_narrow)
+```
+```{r}
+head(min_intense_wide)
+```
+```{r}
+head(min_steps_narrow)
+```
+```{r}
+head(min_steps_wide)
+```
+```{r}
+head(min_sleep)
+```
+```{r}
+head(min_met_narrow)
+```
+
+Similar to the hourly files, the `min_cal`, `min_intense`, and `min_steps` files are recorded under a per minute metric. This metric is too small of a time interval as there are many observations of 0 intensity or steps. The wide format (`min_cal_wide`, `min_intense_wide`, `min_steps_wide`) is a less desired vs the narrow format (`min_cal_narrow`, `min_intense_narrow`, `min_steps_narrow`) because of the ambiguous column names (calories 00, calories 01, etc).
+
+`min_sleep` also contains an ambiguous `value` column that doesn't explain what data it represents.
+
+`min_met_narrow` records the MET (ratio of working metabolic rate relative to resting metabolic rate) per minute. 1 MET is the energy spent sitting at rest. Because the MET is relative to each user (eg. user 1 has higher resting rate than user 2 but much lower than user 3), this file will be dropped because the variable MET is not standardized and therefore will lead to a biased analysis.
+
+```{r}
+# Drop data frames from R environment
+rm(
+  min_cal_narrow,
+  min_cal_wide,
+  min_intense_narrow,
+  min_intense_wide,
+  min_steps_narrow,
+  min_steps_wide,
+  min_sleep,
+  min_met_narrow
+)
+```
+
+Now let's look at the 1 second file:
+
+- `sec_heartrate`
+
+```{r}
+head(sec_heartrate)
+```
+
+`sec_heartrate` records the heart rate (`Value` column) of each user on a couple seconds interval. The data under per seconds metric is too narrow of a time interval to be useful. Although it can be transformed into an average heart rate per hour or per day, I will use the intensity variables in `daily_act` for my analysis instead. Therefore, I will be dropping this file from the analysis.
+
+```{r}
+# Remove data frame from R environment
+rm(sec_heartrate)
+```
+
+Finally, let's take a look the 1 other file:
+
+- `weight_log`
+
+```{r}
+head(weight_log)
+```
+```{r}
+colnames(weight_log)
+```
+```{r}
+n_distinct(weight_log$Id)
+n_distinct(weight_log$Fat)
+unique(weight_log$Fat)
+table(weight_log$Id)
+```
+This file contains useful data for analysis such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the `Fat` column and it is severely incomplete - only 8 users recorded their weight of which only 2 represents the majority of the data.
+
+I will keep this file for now, for the purpose of adding weight into my analysis. But this data is heavily biased and I will drop it if it skews the analysis too much.
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**2. A description of all data sources used:**
+
+The dataset can be found on Kaggle: [Fitbit Fitness Tracker Data](https://www.kaggle.com/arashnic/fitbit "Fitbit Fitness Tracker Data"), by Mobius under the CC0: Public Domain license.
+
+It contains 18 csv files, 3 in wide format, rest in long:
+
+- Data kept for analysis:
+
+  - 'dailyActivity_merged.csv' as `daily_act`
+  - 'sleepDay_merged.csv' as `daily_sleep`
+  - 'weightLogInfo_merged.csv' as `weight_log`
+  
+- Data dropped from analysis:
+  - 'dailyCalories_merged.csv'
+  - 'dailyIntensities_merged.csv'
+  - 'dailySteps_merged.csv'
+  - 'hourlyCalories_merged.csv'
+  - 'hourlyIntensities_merged.csv'
+  - 'hourlySteps_merged.csv'
+  - 'minuteCaloriesNarrow_merged.csv'
+  - 'minuteCaloriesWide_merged.csv'
+  - 'minuteIntensitiesNarrow_merged.csv'
+  - 'minuteIntensitiesWide_merged.csv'
+  - 'minuteStepsNarrow_merged.csv'
+  - 'minuteStepsWide_merged.csv'
+  - 'minuteSleep_merged.csv'
+  - 'minuteMETsNarrow_merged.csv'
+  - 'heartrate_seconds_merged.csv'
+  
+**Credibility: Poor**
+
+- Not reliable. Data is severely incomplete and missing information such that it is not representative of the population.
+- Not original. Data source is from a third-party user (not from Fitbit, government, or academic source).
+- Somewhat comprehensive. There is enough variety of data to gain some insights in order to give recommendations to Bellabeat but with low confidence.
+- Not current. Data collected from April 12, 2016 - May 12, 2016 - 5 years old.
+- Has citation. Data was gathered via an Amazon survey from 30 consented Fitbit users. Hosted on Kaggle with usability of 10.0, meeting all of Kaggle's uploading requirements.
+
+</div>
+
+# Process
+
+Now it's time to clean the remaining data. I will continue to use R (instead of spreadsheets or SQL) for data cleaning because of the many useful packages available.
+
+> Note: Now that I looked into the data more closely, I want to make an important distinction between missing data and incomplete data that I previously mixed up. Missing data generally refers to data with null values (NA); they should actually have a value but were not recorded. Meanwhile, incomplete data refers to data that is absent altogether (eg. only 10 out of 30 users have been recorded, "data is 2/3 incomplete").
+
+Let's first convert all the column names from pascal case to snake case.
+
+```{r Convert col names to snake case}
+# Convert column names into snake case
+daily_act <- clean_names(daily_act)
+daily_sleep <- clean_names(daily_sleep)
+weight_log <- clean_names(weight_log)
+```
+
+I want to take a closer look to see if there's any missing values (NA).
+
+```{r}
+head(daily_act)
+```
+```{r}
+skim_without_charts(daily_act)
+```
+
+There are no missing values (NA) in `daily_act`. With regards to summary statistics (mean, std, quartiles), I will disregard the id column because these are all unique identifiers and should not be aggregated.
+
+```{r}
+# Rename activity_date to date
+daily_act <- daily_act %>% 
+  rename(date=activity_date)
+
+head(daily_act)
+```
+
+```{r}
+head(daily_sleep)
+```
+```{r}
+skim_without_charts(daily_sleep)
+```
+```{r}
+unique(daily_sleep$total_sleep_records)
+```
+
+`daily_sleep` also looks good with no missing values (NA). However, the 'sleep_day' column is in datetime format. It needs to be converted into date format.
+
+```{r Convert daily_sleep datetime to date}
+# Rename sleep_day to date
+daily_sleep <- daily_sleep %>% 
+  rename(date=sleep_day)
+
+# Convert date from datetime to date format
+new_date <- substr(daily_sleep$date, 1, 9)
+daily_sleep$date <- str_trim(new_date, side = c('right'))
+
+head(daily_sleep)
+```
+
+I am interested in understanding 'total_sleep_records' more. How does the Fitbit record an instance of sleep? The average is 1 sleep record per observation, but there are a couple with 2 or 3 sleep records. I may want to look into those observations as well.
+
+'total_minutes_asleep' seems to be correct because it should always be less than 'total_time_in_bed'.
+
+```{r}
+head(weight_log)
+```
+```{r}
+skim_without_charts(weight_log)
+```
+```{r}
+unique(weight_log$date)
+```
+```{r}
+n_distinct(weight_log$log_id)
+```
+
+Out of the 3 data frames, `weight_log` needs the most work.
+
+- The 'date' is recorded in datetime format and will have to be converted into just date in order to remain consistent with the other data frames.
+- 'fat' column will have to be dropped. 
+  - There are 65 missing values out of the total 67. 
+  - There is not enough information given to fill in the missing values.
+  - Fat can not be calculated from the BMI.
+- 'log_id' has 56 distinct values meaning that there are a couple of repeated id values. 
+  - It looks like the values are repeated if the log was recorded at the same time (eg. 2 users logging at date='4/17/2016 11:59:59 PM' will produce the same log_id=1.460938e+12).
+  - This column can also be dropped with the reason that it carries the same information as the unique datetime stamp.
+
+```{r Clean weight_log}
+# Convert date from datetime to date format
+new_date <- substr(weight_log$date, 1, 9)
+weight_log$date <- str_trim(new_date, side = c('right'))
+
+# Drop fat and log_id columns
+weight_log <- weight_log %>% 
+  select(-c(fat, log_id))
+
+head(weight_log)
+```
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**3. Documentation of any cleaning or manipulation of data:**
+
+- Used tidyverse (dplyr, stringr), janitor, and skimr packages.
+- Converted all column names from pascal case to camel case.
+- Renamed 'activity_date' and 'sleep_day' columns in `daily_act` and `daily_sleep`, respectively, to 'date'.
+- Converted 'date' columns in `daily_sleep` and `weight_log` from datetime to date format.
+- All column variables are of the appropriate data type.
+- `daily_act` has no missing (NA) values.
+- `daily_sleep` has no missing (NA) values.
+- `daily_sleep` has correct 'total_minutes_asleep' < 'total_time_in_bed' values because you do not instantly fall asleep once in bed.
+- `weight_log` 'fat' column was dropped due to having 97% missing (NA) values.
+- `weight_log` 'log_id' column was dropped due to it being the representation of the unique datetime instance.
+
+</div>
+
+# Analyze
+
+Now that the 3 data frames are clean, it's time to start analyzing the data.
+
+Tasks:
+
+1. Aggregate and feature engineer data so it's useful and accessible.
+2. Organize and format the data.
+3. Perform calculations.
+4. Identify trends and relationships.
