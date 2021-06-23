@@ -5,6 +5,7 @@ author: "Brandon Luong"
 date: "`r Sys.Date()`"
 output: 
   html_document:
+    keep_md: true
     toc: true
     number_sections: true
 ---
@@ -524,3 +525,6 @@ Tasks:
 2. Organize and format the data.
 3. Perform calculations.
 4. Identify trends and relationships.
+
+
+Testing
