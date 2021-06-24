@@ -5,7 +5,6 @@ author: "Brandon Luong"
 date: "`r Sys.Date()`"
 output: 
   html_document:
-    keep_md: true
     toc: true
     number_sections: true
 ---
@@ -17,11 +16,10 @@ I am part of the marketing analytics team at Bellabeat, a high-tech manufacturer
 
 The Bellabeat Products:
 
-- Bellabeat App: Main smartphone app that tracks all health-related data and connects to the other products.
-- Leaf: Device tracker that records activity, sleep, and stress.
-- Time: Watch that has the looks of a watch and the functionality of the Leaf.
-- Spring: Water bottle that tracks daily water intake.
-- Bellabeat Membership: Subscription-based membership program.
+- Bellabeat app: The Bellabeat app provides users with health data related to their activity, sleep, stress, menstrual cycle, and mindfulness habits. This data can help users better understand their current habits and make healthy decisions. The Bellabeat app connects to their line of smart wellness products.
+- Leaf: Bellabeat’s classic wellness tracker can be worn as a bracelet, necklace, or clip. The Leaf tracker connects to the Bellabeat app to track activity, sleep, and stress.
+- Time: This wellness watch combines the timeless look of a classic timepiece with smart technology to track user activity, sleep, and stress. The Time watch connects to the Bellabeat app to provide you with insights into your daily wellness.
+- Spring: This is a water bottle that tracks daily water intake using smart technology to ensure that you are appropriately hydrated throughout the day. The Spring bottle connects to the Bellabeat app to track your hydration levels.
 
 # Ask
 
@@ -207,7 +205,7 @@ With 0 differences in `daily_act` vs these 3 data, the following files can be sa
 - `daily_steps`
 
 ```{r}
-# Remove data frames from R environment
+# Remove dataframes from R environment
 rm(
   daily_cal,
   daily_intense,
@@ -254,7 +252,7 @@ colnames(hourly_steps)
 These data have already been recorded under a daily metric, so the hourly metric is not needed. Confirming my assumption that the hourly captures per hour observations and isn't too helpful for my particular analysis, I will drop these files.
 
 ```{r}
-# Remove data frames from R environment
+# Remove dataframes from R environment
 rm(
   hourly_cal,
   hourly_intense,
@@ -305,7 +303,7 @@ Similar to the hourly files, the `min_cal`, `min_intense`, and `min_steps` files
 `min_met_narrow` records the MET (ratio of working metabolic rate relative to resting metabolic rate) per minute. 1 MET is the energy spent sitting at rest. Because the MET is relative to each user (eg. user 1 has higher resting rate than user 2 but much lower than user 3), this file will be dropped because the variable MET is not standardized and therefore will lead to a biased analysis.
 
 ```{r}
-# Drop data frames from R environment
+# Drop dataframes from R environment
 rm(
   min_cal_narrow,
   min_cal_wide,
@@ -329,7 +327,7 @@ head(sec_heartrate)
 `sec_heartrate` records the heart rate (`Value` column) of each user on a couple seconds interval. The data under per seconds metric is too narrow of a time interval to be useful. Although it can be transformed into an average heart rate per hour or per day, I will use the intensity variables in `daily_act` for my analysis instead. Therefore, I will be dropping this file from the analysis.
 
 ```{r}
-# Remove data frame from R environment
+# Remove dataframe from R environment
 rm(sec_heartrate)
 ```
 
@@ -349,9 +347,16 @@ n_distinct(weight_log$Fat)
 unique(weight_log$Fat)
 table(weight_log$Id)
 ```
-This file contains useful data for analysis such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the `Fat` column and it is severely incomplete - only 8 users recorded their weight of which only 2 represents the majority of the data.
+This file contains useful data such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the `Fat` column and it is severely incomplete - only 8 users recorded their weight, of which 2 users represent the majority of the data.
 
-I will keep this file for now, for the purpose of adding weight into my analysis. But this data is heavily biased and I will drop it if it skews the analysis too much.
+> Recall: The goal of this analysis is to find trends in order to improve Bellabeat's product marking strategy. Their products track user activity, sleep, and stress.
+
+Although having weight and BMI data is useful for general health analyses, none of Bellabeat's products track the user's weight or BMI. Additionally, the sample size data is too small to be useful (only 8/33 users) for general product recommendations. I will have to drop this file from the analysis.
+
+```{r}
+# Remove dataframe from R environment
+rm(weight_log)
+```
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -368,7 +373,6 @@ It contains 18 csv files, 3 in wide format, rest in long:
 
   - 'dailyActivity_merged.csv' as `daily_act`
   - 'sleepDay_merged.csv' as `daily_sleep`
-  - 'weightLogInfo_merged.csv' as `weight_log`
   
 - Data dropped from analysis:
   - 'dailyCalories_merged.csv'
@@ -386,6 +390,7 @@ It contains 18 csv files, 3 in wide format, rest in long:
   - 'minuteSleep_merged.csv'
   - 'minuteMETsNarrow_merged.csv'
   - 'heartrate_seconds_merged.csv'
+  - 'weightLogInfo.csv'
   
 **Credibility: Poor**
 
@@ -409,7 +414,6 @@ Let's first convert all the column names from pascal case to snake case.
 # Convert column names into snake case
 daily_act <- clean_names(daily_act)
 daily_sleep <- clean_names(daily_sleep)
-weight_log <- clean_names(weight_log)
 ```
 
 I want to take a closer look to see if there's any missing values (NA).
@@ -459,41 +463,6 @@ I am interested in understanding 'total_sleep_records' more. How does the Fitbit
 
 'total_minutes_asleep' seems to be correct because it should always be less than 'total_time_in_bed'.
 
-```{r}
-head(weight_log)
-```
-```{r}
-skim_without_charts(weight_log)
-```
-```{r}
-unique(weight_log$date)
-```
-```{r}
-n_distinct(weight_log$log_id)
-```
-
-Out of the 3 data frames, `weight_log` needs the most work.
-
-- The 'date' is recorded in datetime format and will have to be converted into just date in order to remain consistent with the other data frames.
-- 'fat' column will have to be dropped. 
-  - There are 65 missing values out of the total 67. 
-  - There is not enough information given to fill in the missing values.
-  - Fat can not be calculated from the BMI.
-- 'log_id' has 56 distinct values meaning that there are a couple of repeated id values. 
-  - It looks like the values are repeated if the log was recorded at the same time (eg. 2 users logging at date='4/17/2016 11:59:59 PM' will produce the same log_id=1.460938e+12).
-  - This column can also be dropped with the reason that it carries the same information as the unique datetime stamp.
-
-```{r Clean weight_log}
-# Convert date from datetime to date format
-new_date <- substr(weight_log$date, 1, 9)
-weight_log$date <- str_trim(new_date, side = c('right'))
-
-# Drop fat and log_id columns
-weight_log <- weight_log %>% 
-  select(-c(fat, log_id))
-
-head(weight_log)
-```
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -505,19 +474,17 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 - Used tidyverse (dplyr, stringr), janitor, and skimr packages.
 - Converted all column names from pascal case to camel case.
 - Renamed 'activity_date' and 'sleep_day' columns in `daily_act` and `daily_sleep`, respectively, to 'date'.
-- Converted 'date' columns in `daily_sleep` and `weight_log` from datetime to date format.
+- Converted 'date' columns in `daily_sleep` from datetime to date format.
 - All column variables are of the appropriate data type.
 - `daily_act` has no missing (NA) values.
 - `daily_sleep` has no missing (NA) values.
 - `daily_sleep` has correct 'total_minutes_asleep' < 'total_time_in_bed' values because you do not instantly fall asleep once in bed.
-- `weight_log` 'fat' column was dropped due to having 97% missing (NA) values.
-- `weight_log` 'log_id' column was dropped due to it being the representation of the unique datetime instance.
 
 </div>
 
 # Analyze
 
-Now that the 3 data frames are clean, it's time to start analyzing the data.
+Now that the 3 dataframes are clean, it's time to start analyzing the data.
 
 Tasks:
 
@@ -527,4 +494,25 @@ Tasks:
 4. Identify trends and relationships.
 
 
-Testing
+```{r}
+merged_df <- full_join(
+  full_join(daily_act, daily_sleep, by = NULL), 
+  weight_log, by = NULL)
+```
+```{r}
+skim_without_charts(merged_df)
+```
+
+```{r}
+n_distinct(merged_df$id)
+n_distinct(merged_df$date)
+```
+
+```{r}
+skim_without_charts(daily_sleep)
+```
+
+```{r}
+n_distinct(daily_sleep$id)
+```
+

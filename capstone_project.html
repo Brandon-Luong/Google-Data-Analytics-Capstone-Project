@@ -11,7 +11,7 @@
 
 <meta name="author" content="Brandon Luong" />
 
-<meta name="date" content="2021-06-22" />
+<meta name="date" content="2021-06-23" />
 
 <title>Google Data Analytics Capstone Project</title>
 
@@ -168,7 +168,7 @@ pre code {
 <h1 class="title toc-ignore">Google Data Analytics Capstone Project</h1>
 <h3 class="subtitle">Case Study 2: How Can a Wellness Technology Company Play It Smart?</h3>
 <h4 class="author">Brandon Luong</h4>
-<h4 class="date">2021-06-22</h4>
+<h4 class="date">2021-06-23</h4>
 
 </div>
 
@@ -193,11 +193,10 @@ pre code {
 <p>I am part of the marketing analytics team at Bellabeat, a high-tech manufacturer of health-focused products for women. Bellabeat is a small successful company but has the potential for growth in the global smart device market. Urška Sršen believes that analyzing smart fitness data could help with this growth and unlock new opportunities for the company.</p>
 <p>The Bellabeat Products:</p>
 <ul>
-<li>Bellabeat App: Main smartphone app that tracks all health-related data and connects to the other products.</li>
-<li>Leaf: Device tracker that records activity, sleep, and stress.</li>
-<li>Time: Watch that has the looks of a watch and the functionality of the Leaf.</li>
-<li>Spring: Water bottle that tracks daily water intake.</li>
-<li>Bellabeat Membership: Subscription-based membership program.</li>
+<li>Bellabeat app: The Bellabeat app provides users with health data related to their activity, sleep, stress, menstrual cycle, and mindfulness habits. This data can help users better understand their current habits and make healthy decisions. The Bellabeat app connects to their line of smart wellness products.</li>
+<li>Leaf: Bellabeat’s classic wellness tracker can be worn as a bracelet, necklace, or clip. The Leaf tracker connects to the Bellabeat app to track activity, sleep, and stress.</li>
+<li>Time: This wellness watch combines the timeless look of a classic timepiece with smart technology to track user activity, sleep, and stress. The Time watch connects to the Bellabeat app to provide you with insights into your daily wellness.</li>
+<li>Spring: This is a water bottle that tracks daily water intake using smart technology to ensure that you are appropriately hydrated throughout the day. The Spring bottle connects to the Bellabeat app to track your hydration levels.</li>
 </ul>
 </div>
 <div id="ask" class="section level1" number="2">
@@ -483,7 +482,7 @@ colSums(diff)</code></pre>
 <li><code>daily_intense</code></li>
 <li><code>daily_steps</code></li>
 </ul>
-<pre class="r"><code># Remove data frames from R environment
+<pre class="r"><code># Remove dataframes from R environment
 rm(
   daily_cal,
   daily_intense,
@@ -543,7 +542,7 @@ rm(
 <pre class="r"><code>colnames(hourly_steps)</code></pre>
 <pre><code>## [1] &quot;Id&quot;           &quot;ActivityHour&quot; &quot;StepTotal&quot;</code></pre>
 <p>These data have already been recorded under a daily metric, so the hourly metric is not needed. Confirming my assumption that the hourly captures per hour observations and isn’t too helpful for my particular analysis, I will drop these files.</p>
-<pre class="r"><code># Remove data frames from R environment
+<pre class="r"><code># Remove dataframes from R environment
 rm(
   hourly_cal,
   hourly_intense,
@@ -684,7 +683,7 @@ rm(
 <p>Similar to the hourly files, the <code>min_cal</code>, <code>min_intense</code>, and <code>min_steps</code> files are recorded under a per minute metric. This metric is too small of a time interval as there are many observations of 0 intensity or steps. The wide format (<code>min_cal_wide</code>, <code>min_intense_wide</code>, <code>min_steps_wide</code>) is a less desired vs the narrow format (<code>min_cal_narrow</code>, <code>min_intense_narrow</code>, <code>min_steps_narrow</code>) because of the ambiguous column names (calories 00, calories 01, etc).</p>
 <p><code>min_sleep</code> also contains an ambiguous <code>value</code> column that doesn’t explain what data it represents.</p>
 <p><code>min_met_narrow</code> records the MET (ratio of working metabolic rate relative to resting metabolic rate) per minute. 1 MET is the energy spent sitting at rest. Because the MET is relative to each user (eg. user 1 has higher resting rate than user 2 but much lower than user 3), this file will be dropped because the variable MET is not standardized and therefore will lead to a biased analysis.</p>
-<pre class="r"><code># Drop data frames from R environment
+<pre class="r"><code># Drop dataframes from R environment
 rm(
   min_cal_narrow,
   min_cal_wide,
@@ -710,7 +709,7 @@ rm(
 ## 5 2022484408 4/12/2016 7:21:25 AM   101
 ## 6 2022484408 4/12/2016 7:22:05 AM    95</code></pre>
 <p><code>sec_heartrate</code> records the heart rate (<code>Value</code> column) of each user on a couple seconds interval. The data under per seconds metric is too narrow of a time interval to be useful. Although it can be transformed into an average heart rate per hour or per day, I will use the intensity variables in <code>daily_act</code> for my analysis instead. Therefore, I will be dropping this file from the analysis.</p>
-<pre class="r"><code># Remove data frame from R environment
+<pre class="r"><code># Remove dataframe from R environment
 rm(sec_heartrate)</code></pre>
 <p>Finally, let’s take a look the 1 other file:</p>
 <ul>
@@ -741,8 +740,11 @@ rm(sec_heartrate)</code></pre>
 ##          2          1          2          2          5          1         30 
 ## 8877689391 
 ##         24</code></pre>
-<p>This file contains useful data for analysis such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the <code>Fat</code> column and it is severely incomplete - only 8 users recorded their weight of which only 2 represents the majority of the data.</p>
-<p>I will keep this file for now, for the purpose of adding weight into my analysis. But this data is heavily biased and I will drop it if it skews the analysis too much.</p>
+<p>This file contains useful data such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the <code>Fat</code> column and it is severely incomplete - only 8 users recorded their weight of which only 2 represent the majority of the data.</p>
+<blockquote>
+<p>Recall: The goal of this analysis is to find trends in order to improve Bellabeat’s product marking strategy. Their products track user activity, sleep, and stress.</p>
+</blockquote>
+<p>Although having weight and BMI data is useful for general health analyses, none of Bellabeat’s products track the user’s weight or BMI. Additionally, the sample size data is too small to be useful (only 8/33 users) for general product recommendations. I will have to drop this file from the analysis.</p>
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
@@ -755,7 +757,6 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <ul>
 <li>‘dailyActivity_merged.csv’ as <code>daily_act</code></li>
 <li>‘sleepDay_merged.csv’ as <code>daily_sleep</code></li>
-<li>‘weightLogInfo_merged.csv’ as <code>weight_log</code></li>
 </ul></li>
 <li><p>Data dropped from analysis:</p>
 <ul>
@@ -774,6 +775,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <li>‘minuteSleep_merged.csv’</li>
 <li>‘minuteMETsNarrow_merged.csv’</li>
 <li>‘heartrate_seconds_merged.csv’</li>
+<li>‘weightLogInfo.csv’</li>
 </ul></li>
 </ul>
 <p><strong>Credibility: Poor</strong></p>
@@ -1512,9 +1514,9 @@ head(daily_sleep)</code></pre>
 ## [55] &quot;5/11/2016 6:51:47 AM&quot;  &quot;5/12/2016 6:42:53 AM&quot;</code></pre>
 <pre class="r"><code>n_distinct(weight_log$log_id)</code></pre>
 <pre><code>## [1] 56</code></pre>
-<p>Out of the 3 data frames, <code>weight_log</code> needs the most work.</p>
+<p>Out of the 3 dataframes, <code>weight_log</code> needs the most work.</p>
 <ul>
-<li>The ‘date’ is recorded in datetime format and will have to be converted into just date in order to remain consistent with the other data frames.</li>
+<li>The ‘date’ is recorded in datetime format and will have to be converted into just date in order to remain consistent with the other dataframes.</li>
 <li>‘fat’ column will have to be dropped.
 <ul>
 <li>There are 65 missing values out of the total 67.</li>
@@ -1566,7 +1568,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </div>
 <div id="analyze" class="section level1" number="5">
 <h1 number="5"><span class="header-section-number">5</span> Analyze</h1>
-<p>Now that the 3 data frames are clean, it’s time to start analyzing the data.</p>
+<p>Now that the 3 dataframes are clean, it’s time to start analyzing the data.</p>
 <p>Tasks:</p>
 <ol style="list-style-type: decimal">
 <li>Aggregate and feature engineer data so it’s useful and accessible.</li>
@@ -1574,6 +1576,530 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <li>Perform calculations.</li>
 <li>Identify trends and relationships.</li>
 </ol>
+<pre class="r"><code>merged_df &lt;- full_join(
+  full_join(daily_act, daily_sleep, by = NULL), 
+  weight_log, by = NULL)</code></pre>
+<pre><code>## Joining, by = c(&quot;id&quot;, &quot;date&quot;)
+## Joining, by = c(&quot;id&quot;, &quot;date&quot;)</code></pre>
+<pre class="r"><code>skim_without_charts(merged_df)</code></pre>
+<table>
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">merged_df</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">943</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">22</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">logical</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">20</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">date</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">31</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: logical</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="left">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">is_manual_report</td>
+<td align="right">876</td>
+<td align="right">0.07</td>
+<td align="right">0.61</td>
+<td align="left">TRU: 41, FAL: 26</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="7%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="8%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">id</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">4.858486e+09</td>
+<td align="right">2.423712e+09</td>
+<td align="right">1.50396e+09</td>
+<td align="right">2.320127e+09</td>
+<td align="right">4.445115e+09</td>
+<td align="right">6.962181e+09</td>
+<td align="right">8.877689e+09</td>
+</tr>
+<tr class="even">
+<td align="left">total_steps</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">7.652190e+03</td>
+<td align="right">5.086530e+03</td>
+<td align="right">0.00000e+00</td>
+<td align="right">3.795000e+03</td>
+<td align="right">7.439000e+03</td>
+<td align="right">1.073400e+04</td>
+<td align="right">3.601900e+04</td>
+</tr>
+<tr class="odd">
+<td align="left">total_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5.500000e+00</td>
+<td align="right">3.930000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">2.620000e+00</td>
+<td align="right">5.260000e+00</td>
+<td align="right">7.720000e+00</td>
+<td align="right">2.803000e+01</td>
+</tr>
+<tr class="even">
+<td align="left">tracker_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5.490000e+00</td>
+<td align="right">3.910000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">2.620000e+00</td>
+<td align="right">5.260000e+00</td>
+<td align="right">7.710000e+00</td>
+<td align="right">2.803000e+01</td>
+</tr>
+<tr class="odd">
+<td align="left">logged_activities_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1.100000e-01</td>
+<td align="right">6.200000e-01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">4.940000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">very_active_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1.500000e+00</td>
+<td align="right">2.660000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">2.200000e-01</td>
+<td align="right">2.060000e+00</td>
+<td align="right">2.192000e+01</td>
+</tr>
+<tr class="odd">
+<td align="left">moderately_active_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5.700000e-01</td>
+<td align="right">8.800000e-01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">2.400000e-01</td>
+<td align="right">8.100000e-01</td>
+<td align="right">6.480000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">light_active_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">3.350000e+00</td>
+<td align="right">2.050000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">1.950000e+00</td>
+<td align="right">3.380000e+00</td>
+<td align="right">4.790000e+00</td>
+<td align="right">1.071000e+01</td>
+</tr>
+<tr class="odd">
+<td align="left">sedentary_active_distance</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">1.000000e-02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">1.100000e-01</td>
+</tr>
+<tr class="even">
+<td align="left">very_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2.124000e+01</td>
+<td align="right">3.295000e+01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">4.000000e+00</td>
+<td align="right">3.200000e+01</td>
+<td align="right">2.100000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">fairly_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1.363000e+01</td>
+<td align="right">2.000000e+01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">7.000000e+00</td>
+<td align="right">1.900000e+01</td>
+<td align="right">1.430000e+02</td>
+</tr>
+<tr class="even">
+<td align="left">lightly_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1.930300e+02</td>
+<td align="right">1.093100e+02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">1.270000e+02</td>
+<td align="right">1.990000e+02</td>
+<td align="right">2.640000e+02</td>
+<td align="right">5.180000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">sedentary_minutes</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">9.903500e+02</td>
+<td align="right">3.012600e+02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">7.290000e+02</td>
+<td align="right">1.057000e+03</td>
+<td align="right">1.229000e+03</td>
+<td align="right">1.440000e+03</td>
+</tr>
+<tr class="even">
+<td align="left">calories</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2.307510e+03</td>
+<td align="right">7.208200e+02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">1.829500e+03</td>
+<td align="right">2.140000e+03</td>
+<td align="right">2.796500e+03</td>
+<td align="right">4.900000e+03</td>
+</tr>
+<tr class="odd">
+<td align="left">total_sleep_records</td>
+<td align="right">530</td>
+<td align="right">0.44</td>
+<td align="right">1.120000e+00</td>
+<td align="right">3.500000e-01</td>
+<td align="right">1.00000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">3.000000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">total_minutes_asleep</td>
+<td align="right">530</td>
+<td align="right">0.44</td>
+<td align="right">4.194700e+02</td>
+<td align="right">1.183400e+02</td>
+<td align="right">5.80000e+01</td>
+<td align="right">3.610000e+02</td>
+<td align="right">4.330000e+02</td>
+<td align="right">4.900000e+02</td>
+<td align="right">7.960000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">total_time_in_bed</td>
+<td align="right">530</td>
+<td align="right">0.44</td>
+<td align="right">4.586400e+02</td>
+<td align="right">1.271000e+02</td>
+<td align="right">6.10000e+01</td>
+<td align="right">4.030000e+02</td>
+<td align="right">4.630000e+02</td>
+<td align="right">5.260000e+02</td>
+<td align="right">9.610000e+02</td>
+</tr>
+<tr class="even">
+<td align="left">weight_kg</td>
+<td align="right">876</td>
+<td align="right">0.07</td>
+<td align="right">7.204000e+01</td>
+<td align="right">1.392000e+01</td>
+<td align="right">5.26000e+01</td>
+<td align="right">6.140000e+01</td>
+<td align="right">6.250000e+01</td>
+<td align="right">8.505000e+01</td>
+<td align="right">1.335000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">weight_pounds</td>
+<td align="right">876</td>
+<td align="right">0.07</td>
+<td align="right">1.588100e+02</td>
+<td align="right">3.070000e+01</td>
+<td align="right">1.15960e+02</td>
+<td align="right">1.353600e+02</td>
+<td align="right">1.377900e+02</td>
+<td align="right">1.875000e+02</td>
+<td align="right">2.943200e+02</td>
+</tr>
+<tr class="even">
+<td align="left">bmi</td>
+<td align="right">876</td>
+<td align="right">0.07</td>
+<td align="right">2.519000e+01</td>
+<td align="right">3.070000e+00</td>
+<td align="right">2.14500e+01</td>
+<td align="right">2.396000e+01</td>
+<td align="right">2.439000e+01</td>
+<td align="right">2.556000e+01</td>
+<td align="right">4.754000e+01</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>n_distinct(merged_df$id)</code></pre>
+<pre><code>## [1] 33</code></pre>
+<pre class="r"><code>n_distinct(merged_df$date)</code></pre>
+<pre><code>## [1] 31</code></pre>
+<pre class="r"><code>skim_without_charts(daily_sleep)</code></pre>
+<table>
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">daily_sleep</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">413</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">4</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">date</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="right">31</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="11%" />
+<col width="10%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">id</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5.000979e+09</td>
+<td align="right">2.06036e+09</td>
+<td align="right">1503960366</td>
+<td align="right">3977333714</td>
+<td align="right">4702921684</td>
+<td align="right">6962181067</td>
+<td align="right">8792009665</td>
+</tr>
+<tr class="even">
+<td align="left">total_sleep_records</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.120000e+00</td>
+<td align="right">3.50000e-01</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">total_minutes_asleep</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.194700e+02</td>
+<td align="right">1.18340e+02</td>
+<td align="right">58</td>
+<td align="right">361</td>
+<td align="right">433</td>
+<td align="right">490</td>
+<td align="right">796</td>
+</tr>
+<tr class="even">
+<td align="left">total_time_in_bed</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.586400e+02</td>
+<td align="right">1.27100e+02</td>
+<td align="right">61</td>
+<td align="right">403</td>
+<td align="right">463</td>
+<td align="right">526</td>
+<td align="right">961</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>n_distinct(daily_sleep$id)</code></pre>
+<pre><code>## [1] 24</code></pre>
 </div>
 
 
