@@ -461,7 +461,7 @@ Now that each dataframe is clean, I want to join them together into 1 dataframe.
 
 > Recall that there are 33 users in `daily_act` but only 24 users in `daily_sleep`.
 
-In the ideal scenario, I would use a full outer join and fill in the missing values, but because `daily_sleep` is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.
+In an ideal scenario, I would use a full outer join and fill in the missing values, but because `daily_sleep` is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.
 
 For this reason, I will use an inner join. This limits the dataset even further to just 24 users.
 
@@ -524,10 +524,10 @@ sum(ifelse(merged_df$total_distance != merged_df$tracker_distance, 1, 0))
 merged_df %>% 
   filter(total_distance != tracker_distance)
 ```
-It looks like tracker_distance has the same values as total_distance except for 3 rows, of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.
+It looks like tracker_distance has the same values as total_distance except for 3 rows (0.7% difference), of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.
 
 ```{r}
-# logged_activities_distance values
+# Check logged_activities_distance values
 n_distinct(merged_df$logged_activities_distance)
 table(merged_df$logged_activities_distance)
 ```
@@ -542,18 +542,42 @@ subset(merged_df, logged_activities_distance %in% c(
 ))
 ```
 
-So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users. Additionally, I'm not sure what logged_activities_distance represents, as it is different from total_distance and from (very, moderately, light, sedentary) active distance.
+So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users. 
 
-With no context and the majority of values 0, I will drop this column as well.
+From user id=8378563200, the value=2.0921471118927 was recorded 10 times, and the value=2.25308108329773 was recorded 7 times. I suspect that logged_activities_distance represents manual recordings by the user because it is easier to believe that the user inputted the same distance rather than the user totaling the exact same distance 10 and 7 times across different days.
 
-```{r}
-# Drop tracker_distance and logged_activities_distance
-merged_df <- merged_df %>% 
-  select(-c(tracker_distance, logged_activities_distance))
-```
+With no actual context (besides suspicion) and the majority of values equaling 0 (95% value=0), I will drop this column as well.
 
 ```{r}
 n_distinct(merged_df$sedentary_active_distance)
 table(merged_df$sedentary_active_distance)
+```
+```{r}
+3/413
+```
+
+Similarly, sedentary_active_distance has a majority of 0 values (98.5% value=0). This result makes sense because if you are sedentary (mostly sitting as opposed to walking or running), you won't be covering much distance if at all. So the non-zero values are actually the outliers here and are maybe due to rolling around during sleep.
+
+Because of this, I can also safely drop this column as well.
+
+```{r}
+# Drop tracker_distance, logged_activities_distance, sedentary_active_distance
+merged_df <- merged_df %>% 
+  select(-c(
+    tracker_distance, 
+    logged_activities_distance,
+    sedentary_active_distance))
+
+head(merged_df)
+```
+
+```{r}
+# Convert sleep time from minutes to hours
+merged_df <- merged_df %>% 
+  mutate(
+    hours_asleep = total_minutes_asleep / 60,
+    hours_in_bed = total_time_in_bed / 60)
+
+head(merged_df)
 ```
 
