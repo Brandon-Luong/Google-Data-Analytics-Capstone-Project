@@ -76,8 +76,9 @@ Storage:
 ## Load libraries
 
 ```{r Load libraries}
-library(tidyverse) # Data science package
+library(tidyverse) # General purpose data science package
 library(janitor) # Data cleaning
+library(lubridate) # Date parsing and cleaning
 library(skimr) # Viewing
 ```
 
@@ -106,7 +107,7 @@ min_met_narrow <- read_csv('minuteMETsNarrow_merged.csv')
 # Per Second
 sec_heartrate <- read_csv('heartrate_seconds_merged.csv')
 # Other
-weight_log <- read_csv('weightLogInfo_merged.csv') # Use
+weight_log <- read_csv('weightLogInfo_merged.csv')
 ```
 
 Assumptions:
@@ -406,8 +407,6 @@ It contains 18 csv files, 3 in wide format, rest in long:
 
 Now it's time to clean the remaining data. I will continue to use R (instead of spreadsheets or SQL) for data cleaning because of the many useful packages available.
 
-> Note: Now that I looked into the data more closely, I want to make an important distinction between missing data and incomplete data that I previously mixed up. Missing data generally refers to data with null values (NA); they should actually have a value but were not recorded. Meanwhile, incomplete data refers to data that is absent altogether (eg. only 10 out of 30 users have been recorded, "data is 2/3 incomplete").
-
 Let's first convert all the column names from pascal case to snake case.
 
 ```{r Convert col names to snake case}
@@ -421,48 +420,68 @@ I want to take a closer look to see if there's any missing values (NA).
 ```{r}
 head(daily_act)
 ```
+
 ```{r}
 skim_without_charts(daily_act)
 ```
-
-There are no missing values (NA) in `daily_act`. With regards to summary statistics (mean, std, quartiles), I will disregard the id column because these are all unique identifiers and should not be aggregated.
-
-```{r}
-# Rename activity_date to date
-daily_act <- daily_act %>% 
-  rename(date=activity_date)
-
-head(daily_act)
-```
-
 ```{r}
 head(daily_sleep)
 ```
+
 ```{r}
 skim_without_charts(daily_sleep)
 ```
+
+There are no missing values (NA) in both of the dataframes. With regards to summary statistics (mean, std, quartiles), I will disregard the id columns because these values are all unique identifiers and should not be aggregated.
+
+The date columns are of character (strings) data type and need to be changed into date data type.
+
 ```{r}
-unique(daily_sleep$total_sleep_records)
-```
+# Rename to date column
+daily_act <- daily_act %>% 
+  rename(date=activity_date)
 
-`daily_sleep` also looks good with no missing values (NA). However, the 'sleep_day' column is in datetime format. It needs to be converted into date format.
-
-```{r Convert daily_sleep datetime to date}
-# Rename sleep_day to date
 daily_sleep <- daily_sleep %>% 
   rename(date=sleep_day)
 
-# Convert date from datetime to date format
-new_date <- substr(daily_sleep$date, 1, 9)
-daily_sleep$date <- str_trim(new_date, side = c('right'))
+# Convert to date data type
+daily_act$date <- mdy(daily_act$date)
 
-head(daily_sleep)
+daily_sleep$date <- as_date(
+  mdy_hms(daily_sleep$date)
+)
 ```
 
-I am interested in understanding 'total_sleep_records' more. How does the Fitbit record an instance of sleep? The average is 1 sleep record per observation, but there are a couple with 2 or 3 sleep records. I may want to look into those observations as well.
+```{r}
+n_distinct(daily_act$id)
+n_distinct(daily_sleep$id)
+```
 
-'total_minutes_asleep' seems to be correct because it should always be less than 'total_time_in_bed'.
+Now that each dataframe is clean, I want to join them together into 1 dataframe. They both share id and date values so I will join on those variables.
 
+> Recall that there are 33 users in `daily_act` but only 24 users in `daily_sleep`.
+
+In the ideal scenario, I would use a full outer join and fill in the missing values, but because `daily_sleep` is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.
+
+For this reason, I will use an inner join. This limits the dataset even further to just 24 users.
+
+```{r}
+# Merge dataframes
+merged_df <- inner_join(daily_act, daily_sleep, by = c('id', 'date'))
+```
+
+```{r}
+head(merged_df)
+```
+
+```{r}
+skim_without_charts(merged_df)
+```
+```{r}
+n_distinct(merged_df$id)
+```
+
+`merged_df` looks clean and ready to be analyzed.
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -471,48 +490,70 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 
 **3. Documentation of any cleaning or manipulation of data:**
 
-- Used tidyverse (dplyr, stringr), janitor, and skimr packages.
+- Used tidyverse (dplyr), janitor, lubridate, and skimr packages.
 - Converted all column names from pascal case to camel case.
 - Renamed 'activity_date' and 'sleep_day' columns in `daily_act` and `daily_sleep`, respectively, to 'date'.
-- Converted 'date' columns in `daily_sleep` from datetime to date format.
-- All column variables are of the appropriate data type.
+- Converted 'date' columns in `daily_act` and `daily_sleep` from character (string) data type to date data type.
+
 - `daily_act` has no missing (NA) values.
 - `daily_sleep` has no missing (NA) values.
-- `daily_sleep` has correct 'total_minutes_asleep' < 'total_time_in_bed' values because you do not instantly fall asleep once in bed.
+
+- Merged `daily_act` and `daily_sleep` into `merged_df` using an inner join.
 
 </div>
 
 # Analyze
 
-Now that the 3 dataframes are clean, it's time to start analyzing the data.
-
-Tasks:
-
-1. Aggregate and feature engineer data so it's useful and accessible.
-2. Organize and format the data.
-3. Perform calculations.
-4. Identify trends and relationships.
-
+Let's take a closer look into `merged_df`.
 
 ```{r}
-merged_df <- full_join(
-  full_join(daily_act, daily_sleep, by = NULL), 
-  weight_log, by = NULL)
-```
-```{r}
-skim_without_charts(merged_df)
+head(merged_df)
 ```
 
 ```{r}
-n_distinct(merged_df$id)
-n_distinct(merged_df$date)
+# Add day of the week column
+day_of_week <- wday(merged_df$date, label=TRUE)
+merged_df <- add_column(merged_df, day_of_week, .after='date')
 ```
 
 ```{r}
-skim_without_charts(daily_sleep)
+# Check if tracker_distance and total_distance are the same columns
+sum(ifelse(merged_df$total_distance != merged_df$tracker_distance, 1, 0))
+```
+```{r}
+merged_df %>% 
+  filter(total_distance != tracker_distance)
+```
+It looks like tracker_distance has the same values as total_distance except for 3 rows, of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.
+
+```{r}
+# logged_activities_distance values
+n_distinct(merged_df$logged_activities_distance)
+table(merged_df$logged_activities_distance)
 ```
 
 ```{r}
-n_distinct(daily_sleep$id)
+subset(merged_df, logged_activities_distance %in% c(
+  2.0921471118927,
+  2.25308108329773,
+  2.78517508506775,
+  3.16782188415527,
+  4.08169221878052
+))
+```
+
+So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users. Additionally, I'm not sure what logged_activities_distance represents, as it is different from total_distance and from (very, moderately, light, sedentary) active distance.
+
+With no context and the majority of values 0, I will drop this column as well.
+
+```{r}
+# Drop tracker_distance and logged_activities_distance
+merged_df <- merged_df %>% 
+  select(-c(tracker_distance, logged_activities_distance))
+```
+
+```{r}
+n_distinct(merged_df$sedentary_active_distance)
+table(merged_df$sedentary_active_distance)
 ```
 

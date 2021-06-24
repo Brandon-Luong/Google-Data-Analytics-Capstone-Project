@@ -250,7 +250,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </ul>
 <div id="load-libraries" class="section level2" number="3.1">
 <h2 number="3.1"><span class="header-section-number">3.1</span> Load libraries</h2>
-<pre class="r"><code>library(tidyverse) # Data science package</code></pre>
+<pre class="r"><code>library(tidyverse) # General purpose data science package</code></pre>
 <pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
 <pre><code>## v ggplot2 3.3.3     v purrr   0.3.4
 ## v tibble  3.1.2     v dplyr   1.0.6
@@ -265,6 +265,12 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <pre><code>## The following objects are masked from &#39;package:stats&#39;:
 ## 
 ##     chisq.test, fisher.test</code></pre>
+<pre class="r"><code>library(lubridate) # Date parsing and cleaning</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
 <pre class="r"><code>library(skimr) # Viewing</code></pre>
 </div>
 <div id="import-csv-files" class="section level2" number="3.2">
@@ -291,7 +297,7 @@ min_met_narrow &lt;- read_csv(&#39;minuteMETsNarrow_merged.csv&#39;)
 # Per Second
 sec_heartrate &lt;- read_csv(&#39;heartrate_seconds_merged.csv&#39;)
 # Other
-weight_log &lt;- read_csv(&#39;weightLogInfo_merged.csv&#39;) # Use</code></pre>
+weight_log &lt;- read_csv(&#39;weightLogInfo_merged.csv&#39;)</code></pre>
 <p>Assumptions:</p>
 <ul>
 <li>The data seems to be broken up into daily, hourly, per minute, per second, and other categories.</li>
@@ -740,11 +746,13 @@ rm(sec_heartrate)</code></pre>
 ##          2          1          2          2          5          1         30 
 ## 8877689391 
 ##         24</code></pre>
-<p>This file contains useful data such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the <code>Fat</code> column and it is severely incomplete - only 8 users recorded their weight of which only 2 represent the majority of the data.</p>
+<p>This file contains useful data such as the weight, fat, and BMI (Body Mass Index) of the users. However, there are only 2 recorded values in the <code>Fat</code> column and it is severely incomplete - only 8 users recorded their weight, of which 2 users represent the majority of the data.</p>
 <blockquote>
 <p>Recall: The goal of this analysis is to find trends in order to improve Bellabeat’s product marking strategy. Their products track user activity, sleep, and stress.</p>
 </blockquote>
 <p>Although having weight and BMI data is useful for general health analyses, none of Bellabeat’s products track the user’s weight or BMI. Additionally, the sample size data is too small to be useful (only 8/33 users) for general product recommendations. I will have to drop this file from the analysis.</p>
+<pre class="r"><code># Remove dataframe from R environment
+rm(weight_log)</code></pre>
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
@@ -792,14 +800,10 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <div id="process" class="section level1" number="4">
 <h1 number="4"><span class="header-section-number">4</span> Process</h1>
 <p>Now it’s time to clean the remaining data. I will continue to use R (instead of spreadsheets or SQL) for data cleaning because of the many useful packages available.</p>
-<blockquote>
-<p>Note: Now that I looked into the data more closely, I want to make an important distinction between missing data and incomplete data that I previously mixed up. Missing data generally refers to data with null values (NA); they should actually have a value but were not recorded. Meanwhile, incomplete data refers to data that is absent altogether (eg. only 10 out of 30 users have been recorded, “data is 2/3 incomplete”).</p>
-</blockquote>
 <p>Let’s first convert all the column names from pascal case to snake case.</p>
 <pre class="r"><code># Convert column names into snake case
 daily_act &lt;- clean_names(daily_act)
-daily_sleep &lt;- clean_names(daily_sleep)
-weight_log &lt;- clean_names(weight_log)</code></pre>
+daily_sleep &lt;- clean_names(daily_sleep)</code></pre>
 <p>I want to take a closer look to see if there’s any missing values (NA).</p>
 <pre class="r"><code>head(daily_act)</code></pre>
 <pre><code>## # A tibble: 6 x 15
@@ -1084,26 +1088,6 @@ weight_log &lt;- clean_names(weight_log)</code></pre>
 </tr>
 </tbody>
 </table>
-<p>There are no missing values (NA) in <code>daily_act</code>. With regards to summary statistics (mean, std, quartiles), I will disregard the id column because these are all unique identifiers and should not be aggregated.</p>
-<pre class="r"><code># Rename activity_date to date
-daily_act &lt;- daily_act %&gt;% 
-  rename(date=activity_date)
-
-head(daily_act)</code></pre>
-<pre><code>## # A tibble: 6 x 15
-##         id date   total_steps total_distance tracker_distance logged_activities~
-##      &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;              &lt;dbl&gt;
-## 1   1.50e9 4/12/~       13162           8.5              8.5                   0
-## 2   1.50e9 4/13/~       10735           6.97             6.97                  0
-## 3   1.50e9 4/14/~       10460           6.74             6.74                  0
-## 4   1.50e9 4/15/~        9762           6.28             6.28                  0
-## 5   1.50e9 4/16/~       12669           8.16             8.16                  0
-## 6   1.50e9 4/17/~        9705           6.48             6.48                  0
-## # ... with 9 more variables: very_active_distance &lt;dbl&gt;,
-## #   moderately_active_distance &lt;dbl&gt;, light_active_distance &lt;dbl&gt;,
-## #   sedentary_active_distance &lt;dbl&gt;, very_active_minutes &lt;dbl&gt;,
-## #   fairly_active_minutes &lt;dbl&gt;, lightly_active_minutes &lt;dbl&gt;,
-## #   sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;</code></pre>
 <pre class="r"><code>head(daily_sleep)</code></pre>
 <pre><code>## # A tibble: 6 x 5
 ##         id sleep_day       total_sleep_recor~ total_minutes_as~ total_time_in_b~
@@ -1262,325 +1246,49 @@ head(daily_act)</code></pre>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>unique(daily_sleep$total_sleep_records)</code></pre>
-<pre><code>## [1] 1 2 3</code></pre>
-<p><code>daily_sleep</code> also looks good with no missing values (NA). However, the ‘sleep_day’ column is in datetime format. It needs to be converted into date format.</p>
-<pre class="r"><code># Rename sleep_day to date
+<p>There are no missing values (NA) in both of the dataframes. With regards to summary statistics (mean, std, quartiles), I will disregard the id columns because these values are all unique identifiers and should not be aggregated.</p>
+<p>The date columns are of character (strings) data type and need to be changed into date data type.</p>
+<pre class="r"><code># Rename to date column
+daily_act &lt;- daily_act %&gt;% 
+  rename(date=activity_date)
+
 daily_sleep &lt;- daily_sleep %&gt;% 
   rename(date=sleep_day)
 
-# Convert date from datetime to date format
-new_date &lt;- substr(daily_sleep$date, 1, 9)
-daily_sleep$date &lt;- str_trim(new_date, side = c(&#39;right&#39;))
+# Convert to date data type
+daily_act$date &lt;- mdy(daily_act$date)
 
-head(daily_sleep)</code></pre>
-<pre><code>## # A tibble: 6 x 5
-##           id date      total_sleep_records total_minutes_asleep total_time_in_b~
-##        &lt;dbl&gt; &lt;chr&gt;                   &lt;dbl&gt;                &lt;dbl&gt;            &lt;dbl&gt;
-## 1 1503960366 4/12/2016                   1                  327              346
-## 2 1503960366 4/13/2016                   2                  384              407
-## 3 1503960366 4/15/2016                   1                  412              442
-## 4 1503960366 4/16/2016                   2                  340              367
-## 5 1503960366 4/17/2016                   1                  700              712
-## 6 1503960366 4/19/2016                   1                  304              320</code></pre>
-<p>I am interested in understanding ‘total_sleep_records’ more. How does the Fitbit record an instance of sleep? The average is 1 sleep record per observation, but there are a couple with 2 or 3 sleep records. I may want to look into those observations as well.</p>
-<p>‘total_minutes_asleep’ seems to be correct because it should always be less than ‘total_time_in_bed’.</p>
-<pre class="r"><code>head(weight_log)</code></pre>
-<pre><code>## # A tibble: 6 x 8
-##        id date     weight_kg weight_pounds   fat   bmi is_manual_report   log_id
-##     &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;               &lt;dbl&gt;
-## 1  1.50e9 5/2/201~      52.6          116.    22  22.6 TRUE              1.46e12
-## 2  1.50e9 5/3/201~      52.6          116.    NA  22.6 TRUE              1.46e12
-## 3  1.93e9 4/13/20~     134.           294.    NA  47.5 FALSE             1.46e12
-## 4  2.87e9 4/21/20~      56.7          125.    NA  21.5 TRUE              1.46e12
-## 5  2.87e9 5/12/20~      57.3          126.    NA  21.7 TRUE              1.46e12
-## 6  4.32e9 4/17/20~      72.4          160.    25  27.5 TRUE              1.46e12</code></pre>
-<pre class="r"><code>skim_without_charts(weight_log)</code></pre>
-<table>
-<caption>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td align="left">Name</td>
-<td align="left">weight_log</td>
-</tr>
-<tr class="even">
-<td align="left">Number of rows</td>
-<td align="left">67</td>
-</tr>
-<tr class="odd">
-<td align="left">Number of columns</td>
-<td align="left">8</td>
-</tr>
-<tr class="even">
-<td align="left">_______________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Column type frequency:</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">character</td>
-<td align="left">1</td>
-</tr>
-<tr class="odd">
-<td align="left">logical</td>
-<td align="left">1</td>
-</tr>
-<tr class="even">
-<td align="left">numeric</td>
-<td align="left">6</td>
-</tr>
-<tr class="odd">
-<td align="left">________________________</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">Group variables</td>
-<td align="left">None</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: character</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
-<th align="right">n_unique</th>
-<th align="right">whitespace</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">date</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">19</td>
-<td align="right">21</td>
-<td align="right">0</td>
-<td align="right">56</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: logical</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="left">count</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">is_manual_report</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.61</td>
-<td align="left">TRU: 41, FAL: 26</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: numeric</strong></p>
-<table style="width:100%;">
-<colgroup>
-<col width="10%" />
-<col width="7%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">p0</th>
-<th align="right">p25</th>
-<th align="right">p50</th>
-<th align="right">p75</th>
-<th align="right">p100</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">id</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">7.009282e+09</td>
-<td align="right">1.950322e+09</td>
-<td align="right">1.503960e+09</td>
-<td align="right">6.962181e+09</td>
-<td align="right">6.962181e+09</td>
-<td align="right">8.877689e+09</td>
-<td align="right">8.877689e+09</td>
-</tr>
-<tr class="even">
-<td align="left">weight_kg</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">7.204000e+01</td>
-<td align="right">1.392000e+01</td>
-<td align="right">5.260000e+01</td>
-<td align="right">6.140000e+01</td>
-<td align="right">6.250000e+01</td>
-<td align="right">8.505000e+01</td>
-<td align="right">1.335000e+02</td>
-</tr>
-<tr class="odd">
-<td align="left">weight_pounds</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.588100e+02</td>
-<td align="right">3.070000e+01</td>
-<td align="right">1.159600e+02</td>
-<td align="right">1.353600e+02</td>
-<td align="right">1.377900e+02</td>
-<td align="right">1.875000e+02</td>
-<td align="right">2.943200e+02</td>
-</tr>
-<tr class="even">
-<td align="left">fat</td>
-<td align="right">65</td>
-<td align="right">0.03</td>
-<td align="right">2.350000e+01</td>
-<td align="right">2.120000e+00</td>
-<td align="right">2.200000e+01</td>
-<td align="right">2.275000e+01</td>
-<td align="right">2.350000e+01</td>
-<td align="right">2.425000e+01</td>
-<td align="right">2.500000e+01</td>
-</tr>
-<tr class="odd">
-<td align="left">bmi</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">2.519000e+01</td>
-<td align="right">3.070000e+00</td>
-<td align="right">2.145000e+01</td>
-<td align="right">2.396000e+01</td>
-<td align="right">2.439000e+01</td>
-<td align="right">2.556000e+01</td>
-<td align="right">4.754000e+01</td>
-</tr>
-<tr class="even">
-<td align="left">log_id</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.461772e+12</td>
-<td align="right">7.829948e+08</td>
-<td align="right">1.460444e+12</td>
-<td align="right">1.461079e+12</td>
-<td align="right">1.461802e+12</td>
-<td align="right">1.462375e+12</td>
-<td align="right">1.463098e+12</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>unique(weight_log$date)</code></pre>
-<pre><code>##  [1] &quot;5/2/2016 11:59:59 PM&quot;  &quot;5/3/2016 11:59:59 PM&quot;  &quot;4/13/2016 1:08:52 AM&quot; 
-##  [4] &quot;4/21/2016 11:59:59 PM&quot; &quot;5/12/2016 11:59:59 PM&quot; &quot;4/17/2016 11:59:59 PM&quot;
-##  [7] &quot;5/4/2016 11:59:59 PM&quot;  &quot;4/18/2016 11:59:59 PM&quot; &quot;4/25/2016 11:59:59 PM&quot;
-## [10] &quot;5/1/2016 11:59:59 PM&quot;  &quot;5/9/2016 11:59:59 PM&quot;  &quot;4/17/2016 9:17:55 AM&quot; 
-## [13] &quot;4/12/2016 11:59:59 PM&quot; &quot;4/13/2016 11:59:59 PM&quot; &quot;4/14/2016 11:59:59 PM&quot;
-## [16] &quot;4/15/2016 11:59:59 PM&quot; &quot;4/16/2016 11:59:59 PM&quot; &quot;4/19/2016 11:59:59 PM&quot;
-## [19] &quot;4/20/2016 11:59:59 PM&quot; &quot;4/22/2016 11:59:59 PM&quot; &quot;4/23/2016 11:59:59 PM&quot;
-## [22] &quot;4/24/2016 11:59:59 PM&quot; &quot;4/27/2016 11:59:59 PM&quot; &quot;4/28/2016 11:59:59 PM&quot;
-## [25] &quot;4/29/2016 11:59:59 PM&quot; &quot;4/30/2016 11:59:59 PM&quot; &quot;5/5/2016 11:59:59 PM&quot; 
-## [28] &quot;5/6/2016 11:59:59 PM&quot;  &quot;5/7/2016 11:59:59 PM&quot;  &quot;5/8/2016 11:59:59 PM&quot; 
-## [31] &quot;5/10/2016 11:59:59 PM&quot; &quot;5/11/2016 11:59:59 PM&quot; &quot;4/12/2016 6:47:11 AM&quot; 
-## [34] &quot;4/13/2016 6:55:00 AM&quot;  &quot;4/14/2016 6:48:43 AM&quot;  &quot;4/16/2016 1:39:25 PM&quot; 
-## [37] &quot;4/18/2016 6:51:14 AM&quot;  &quot;4/19/2016 6:39:31 AM&quot;  &quot;4/20/2016 6:44:54 AM&quot; 
-## [40] &quot;4/21/2016 6:50:27 AM&quot;  &quot;4/23/2016 7:22:28 AM&quot;  &quot;4/24/2016 7:38:05 AM&quot; 
-## [43] &quot;4/25/2016 6:40:16 AM&quot;  &quot;4/26/2016 6:50:27 AM&quot;  &quot;4/27/2016 6:51:05 AM&quot; 
-## [46] &quot;4/28/2016 6:50:03 AM&quot;  &quot;4/29/2016 6:49:55 AM&quot;  &quot;4/30/2016 7:49:03 AM&quot; 
-## [49] &quot;5/1/2016 8:47:49 AM&quot;   &quot;5/3/2016 6:49:41 AM&quot;   &quot;5/4/2016 6:48:22 AM&quot;  
-## [52] &quot;5/6/2016 6:43:35 AM&quot;   &quot;5/8/2016 7:35:53 AM&quot;   &quot;5/9/2016 6:39:44 AM&quot;  
-## [55] &quot;5/11/2016 6:51:47 AM&quot;  &quot;5/12/2016 6:42:53 AM&quot;</code></pre>
-<pre class="r"><code>n_distinct(weight_log$log_id)</code></pre>
-<pre><code>## [1] 56</code></pre>
-<p>Out of the 3 dataframes, <code>weight_log</code> needs the most work.</p>
-<ul>
-<li>The ‘date’ is recorded in datetime format and will have to be converted into just date in order to remain consistent with the other dataframes.</li>
-<li>‘fat’ column will have to be dropped.
-<ul>
-<li>There are 65 missing values out of the total 67.</li>
-<li>There is not enough information given to fill in the missing values.</li>
-<li>Fat can not be calculated from the BMI.</li>
-</ul></li>
-<li>‘log_id’ has 56 distinct values meaning that there are a couple of repeated id values.
-<ul>
-<li>It looks like the values are repeated if the log was recorded at the same time (eg. 2 users logging at date=‘4/17/2016 11:59:59 PM’ will produce the same log_id=1.460938e+12).</li>
-<li>This column can also be dropped with the reason that it carries the same information as the unique datetime stamp.</li>
-</ul></li>
-</ul>
-<pre class="r"><code># Convert date from datetime to date format
-new_date &lt;- substr(weight_log$date, 1, 9)
-weight_log$date &lt;- str_trim(new_date, side = c(&#39;right&#39;))
-
-# Drop fat and log_id columns
-weight_log &lt;- weight_log %&gt;% 
-  select(-c(fat, log_id))
-
-head(weight_log)</code></pre>
-<pre><code>## # A tibble: 6 x 6
-##           id date      weight_kg weight_pounds   bmi is_manual_report
-##        &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;           
-## 1 1503960366 5/2/2016       52.6          116.  22.6 TRUE            
-## 2 1503960366 5/3/2016       52.6          116.  22.6 TRUE            
-## 3 1927972279 4/13/2016     134.           294.  47.5 FALSE           
-## 4 2873212765 4/21/2016      56.7          125.  21.5 TRUE            
-## 5 2873212765 5/12/2016      57.3          126.  21.7 TRUE            
-## 6 4319703577 4/17/2016      72.4          160.  27.5 TRUE</code></pre>
-<style>
-div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
-</style>
-<div class="blue">
-<p><strong>3. Documentation of any cleaning or manipulation of data:</strong></p>
-<ul>
-<li>Used tidyverse (dplyr, stringr), janitor, and skimr packages.</li>
-<li>Converted all column names from pascal case to camel case.</li>
-<li>Renamed ‘activity_date’ and ‘sleep_day’ columns in <code>daily_act</code> and <code>daily_sleep</code>, respectively, to ‘date’.</li>
-<li>Converted ‘date’ columns in <code>daily_sleep</code> and <code>weight_log</code> from datetime to date format.</li>
-<li>All column variables are of the appropriate data type.</li>
-<li><code>daily_act</code> has no missing (NA) values.</li>
-<li><code>daily_sleep</code> has no missing (NA) values.</li>
-<li><code>daily_sleep</code> has correct ‘total_minutes_asleep’ &lt; ‘total_time_in_bed’ values because you do not instantly fall asleep once in bed.</li>
-<li><code>weight_log</code> ‘fat’ column was dropped due to having 97% missing (NA) values.</li>
-<li><code>weight_log</code> ‘log_id’ column was dropped due to it being the representation of the unique datetime instance.</li>
-</ul>
-</div>
-</div>
-<div id="analyze" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Analyze</h1>
-<p>Now that the 3 dataframes are clean, it’s time to start analyzing the data.</p>
-<p>Tasks:</p>
-<ol style="list-style-type: decimal">
-<li>Aggregate and feature engineer data so it’s useful and accessible.</li>
-<li>Organize and format the data.</li>
-<li>Perform calculations.</li>
-<li>Identify trends and relationships.</li>
-</ol>
-<pre class="r"><code>merged_df &lt;- full_join(
-  full_join(daily_act, daily_sleep, by = NULL), 
-  weight_log, by = NULL)</code></pre>
-<pre><code>## Joining, by = c(&quot;id&quot;, &quot;date&quot;)
-## Joining, by = c(&quot;id&quot;, &quot;date&quot;)</code></pre>
+daily_sleep$date &lt;- as_date(
+  mdy_hms(daily_sleep$date)
+)</code></pre>
+<pre class="r"><code>n_distinct(daily_act$id)</code></pre>
+<pre><code>## [1] 33</code></pre>
+<pre class="r"><code>n_distinct(daily_sleep$id)</code></pre>
+<pre><code>## [1] 24</code></pre>
+<p>Now that each dataframe is clean, I want to join them together into 1 dataframe. They both share id and date values so I will join on those variables.</p>
+<blockquote>
+<p>Recall that there are 33 users in <code>daily_act</code> but only 24 users in <code>daily_sleep</code>.</p>
+</blockquote>
+<p>In the ideal scenario, I would use a full outer join and fill in the missing values, but because <code>daily_sleep</code> is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.</p>
+<p>For this reason, I will use an inner join. This limits the dataset even further to just 24 users.</p>
+<pre class="r"><code># Merge dataframes
+merged_df &lt;- inner_join(daily_act, daily_sleep, by = c(&#39;id&#39;, &#39;date&#39;))</code></pre>
+<pre class="r"><code>head(merged_df)</code></pre>
+<pre><code>## # A tibble: 6 x 18
+##       id date       total_steps total_distance tracker_distance logged_activiti~
+##    &lt;dbl&gt; &lt;date&gt;           &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 1.50e9 2016-04-12       13162           8.5              8.5                 0
+## 2 1.50e9 2016-04-13       10735           6.97             6.97                0
+## 3 1.50e9 2016-04-15        9762           6.28             6.28                0
+## 4 1.50e9 2016-04-16       12669           8.16             8.16                0
+## 5 1.50e9 2016-04-17        9705           6.48             6.48                0
+## 6 1.50e9 2016-04-19       15506           9.88             9.88                0
+## # ... with 12 more variables: very_active_distance &lt;dbl&gt;,
+## #   moderately_active_distance &lt;dbl&gt;, light_active_distance &lt;dbl&gt;,
+## #   sedentary_active_distance &lt;dbl&gt;, very_active_minutes &lt;dbl&gt;,
+## #   fairly_active_minutes &lt;dbl&gt;, lightly_active_minutes &lt;dbl&gt;,
+## #   sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;, total_sleep_records &lt;dbl&gt;,
+## #   total_minutes_asleep &lt;dbl&gt;, total_time_in_bed &lt;dbl&gt;</code></pre>
 <pre class="r"><code>skim_without_charts(merged_df)</code></pre>
 <table>
 <caption>Data summary</caption>
@@ -1591,11 +1299,11 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </tr>
 <tr class="even">
 <td align="left">Number of rows</td>
-<td align="left">943</td>
+<td align="left">413</td>
 </tr>
 <tr class="odd">
 <td align="left">Number of columns</td>
-<td align="left">22</td>
+<td align="left">18</td>
 </tr>
 <tr class="even">
 <td align="left">_______________________</td>
@@ -1606,39 +1314,34 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">character</td>
+<td align="left">Date</td>
 <td align="left">1</td>
 </tr>
 <tr class="odd">
-<td align="left">logical</td>
-<td align="left">1</td>
+<td align="left">numeric</td>
+<td align="left">17</td>
 </tr>
 <tr class="even">
-<td align="left">numeric</td>
-<td align="left">20</td>
-</tr>
-<tr class="odd">
 <td align="left">________________________</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Group variables</td>
 <td align="left">None</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Variable type: character</strong></p>
+<p><strong>Variable type: Date</strong></p>
 <table>
 <thead>
 <tr class="header">
 <th align="left">skim_variable</th>
 <th align="right">n_missing</th>
 <th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
+<th align="left">min</th>
+<th align="left">max</th>
+<th align="left">median</th>
 <th align="right">n_unique</th>
-<th align="right">whitespace</th>
 </tr>
 </thead>
 <tbody>
@@ -1646,32 +1349,10 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <td align="left">date</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">8</td>
-<td align="right">9</td>
-<td align="right">0</td>
+<td align="left">2016-04-12</td>
+<td align="left">2016-05-12</td>
+<td align="left">2016-04-27</td>
 <td align="right">31</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: logical</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="left">count</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">is_manual_report</td>
-<td align="right">876</td>
-<td align="right">0.07</td>
-<td align="right">0.61</td>
-<td align="left">TRU: 41, FAL: 26</td>
 </tr>
 </tbody>
 </table>
@@ -1680,357 +1361,13 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <colgroup>
 <col width="19%" />
 <col width="7%" />
-<col width="9%" />
-<col width="9%" />
-<col width="9%" />
-<col width="8%" />
-<col width="9%" />
-<col width="9%" />
-<col width="9%" />
-<col width="9%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">p0</th>
-<th align="right">p25</th>
-<th align="right">p50</th>
-<th align="right">p75</th>
-<th align="right">p100</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">id</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">4.858486e+09</td>
-<td align="right">2.423712e+09</td>
-<td align="right">1.50396e+09</td>
-<td align="right">2.320127e+09</td>
-<td align="right">4.445115e+09</td>
-<td align="right">6.962181e+09</td>
-<td align="right">8.877689e+09</td>
-</tr>
-<tr class="even">
-<td align="left">total_steps</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">7.652190e+03</td>
-<td align="right">5.086530e+03</td>
-<td align="right">0.00000e+00</td>
-<td align="right">3.795000e+03</td>
-<td align="right">7.439000e+03</td>
-<td align="right">1.073400e+04</td>
-<td align="right">3.601900e+04</td>
-</tr>
-<tr class="odd">
-<td align="left">total_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">5.500000e+00</td>
-<td align="right">3.930000e+00</td>
-<td align="right">0.00000e+00</td>
-<td align="right">2.620000e+00</td>
-<td align="right">5.260000e+00</td>
-<td align="right">7.720000e+00</td>
-<td align="right">2.803000e+01</td>
-</tr>
-<tr class="even">
-<td align="left">tracker_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">5.490000e+00</td>
-<td align="right">3.910000e+00</td>
-<td align="right">0.00000e+00</td>
-<td align="right">2.620000e+00</td>
-<td align="right">5.260000e+00</td>
-<td align="right">7.710000e+00</td>
-<td align="right">2.803000e+01</td>
-</tr>
-<tr class="odd">
-<td align="left">logged_activities_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.100000e-01</td>
-<td align="right">6.200000e-01</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">4.940000e+00</td>
-</tr>
-<tr class="even">
-<td align="left">very_active_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.500000e+00</td>
-<td align="right">2.660000e+00</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">2.200000e-01</td>
-<td align="right">2.060000e+00</td>
-<td align="right">2.192000e+01</td>
-</tr>
-<tr class="odd">
-<td align="left">moderately_active_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">5.700000e-01</td>
-<td align="right">8.800000e-01</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">2.400000e-01</td>
-<td align="right">8.100000e-01</td>
-<td align="right">6.480000e+00</td>
-</tr>
-<tr class="even">
-<td align="left">light_active_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">3.350000e+00</td>
-<td align="right">2.050000e+00</td>
-<td align="right">0.00000e+00</td>
-<td align="right">1.950000e+00</td>
-<td align="right">3.380000e+00</td>
-<td align="right">4.790000e+00</td>
-<td align="right">1.071000e+01</td>
-</tr>
-<tr class="odd">
-<td align="left">sedentary_active_distance</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">1.000000e-02</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">1.100000e-01</td>
-</tr>
-<tr class="even">
-<td align="left">very_active_minutes</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">2.124000e+01</td>
-<td align="right">3.295000e+01</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">4.000000e+00</td>
-<td align="right">3.200000e+01</td>
-<td align="right">2.100000e+02</td>
-</tr>
-<tr class="odd">
-<td align="left">fairly_active_minutes</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.363000e+01</td>
-<td align="right">2.000000e+01</td>
-<td align="right">0.00000e+00</td>
-<td align="right">0.000000e+00</td>
-<td align="right">7.000000e+00</td>
-<td align="right">1.900000e+01</td>
-<td align="right">1.430000e+02</td>
-</tr>
-<tr class="even">
-<td align="left">lightly_active_minutes</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">1.930300e+02</td>
-<td align="right">1.093100e+02</td>
-<td align="right">0.00000e+00</td>
-<td align="right">1.270000e+02</td>
-<td align="right">1.990000e+02</td>
-<td align="right">2.640000e+02</td>
-<td align="right">5.180000e+02</td>
-</tr>
-<tr class="odd">
-<td align="left">sedentary_minutes</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">9.903500e+02</td>
-<td align="right">3.012600e+02</td>
-<td align="right">0.00000e+00</td>
-<td align="right">7.290000e+02</td>
-<td align="right">1.057000e+03</td>
-<td align="right">1.229000e+03</td>
-<td align="right">1.440000e+03</td>
-</tr>
-<tr class="even">
-<td align="left">calories</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">2.307510e+03</td>
-<td align="right">7.208200e+02</td>
-<td align="right">0.00000e+00</td>
-<td align="right">1.829500e+03</td>
-<td align="right">2.140000e+03</td>
-<td align="right">2.796500e+03</td>
-<td align="right">4.900000e+03</td>
-</tr>
-<tr class="odd">
-<td align="left">total_sleep_records</td>
-<td align="right">530</td>
-<td align="right">0.44</td>
-<td align="right">1.120000e+00</td>
-<td align="right">3.500000e-01</td>
-<td align="right">1.00000e+00</td>
-<td align="right">1.000000e+00</td>
-<td align="right">1.000000e+00</td>
-<td align="right">1.000000e+00</td>
-<td align="right">3.000000e+00</td>
-</tr>
-<tr class="even">
-<td align="left">total_minutes_asleep</td>
-<td align="right">530</td>
-<td align="right">0.44</td>
-<td align="right">4.194700e+02</td>
-<td align="right">1.183400e+02</td>
-<td align="right">5.80000e+01</td>
-<td align="right">3.610000e+02</td>
-<td align="right">4.330000e+02</td>
-<td align="right">4.900000e+02</td>
-<td align="right">7.960000e+02</td>
-</tr>
-<tr class="odd">
-<td align="left">total_time_in_bed</td>
-<td align="right">530</td>
-<td align="right">0.44</td>
-<td align="right">4.586400e+02</td>
-<td align="right">1.271000e+02</td>
-<td align="right">6.10000e+01</td>
-<td align="right">4.030000e+02</td>
-<td align="right">4.630000e+02</td>
-<td align="right">5.260000e+02</td>
-<td align="right">9.610000e+02</td>
-</tr>
-<tr class="even">
-<td align="left">weight_kg</td>
-<td align="right">876</td>
-<td align="right">0.07</td>
-<td align="right">7.204000e+01</td>
-<td align="right">1.392000e+01</td>
-<td align="right">5.26000e+01</td>
-<td align="right">6.140000e+01</td>
-<td align="right">6.250000e+01</td>
-<td align="right">8.505000e+01</td>
-<td align="right">1.335000e+02</td>
-</tr>
-<tr class="odd">
-<td align="left">weight_pounds</td>
-<td align="right">876</td>
-<td align="right">0.07</td>
-<td align="right">1.588100e+02</td>
-<td align="right">3.070000e+01</td>
-<td align="right">1.15960e+02</td>
-<td align="right">1.353600e+02</td>
-<td align="right">1.377900e+02</td>
-<td align="right">1.875000e+02</td>
-<td align="right">2.943200e+02</td>
-</tr>
-<tr class="even">
-<td align="left">bmi</td>
-<td align="right">876</td>
-<td align="right">0.07</td>
-<td align="right">2.519000e+01</td>
-<td align="right">3.070000e+00</td>
-<td align="right">2.14500e+01</td>
-<td align="right">2.396000e+01</td>
-<td align="right">2.439000e+01</td>
-<td align="right">2.556000e+01</td>
-<td align="right">4.754000e+01</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>n_distinct(merged_df$id)</code></pre>
-<pre><code>## [1] 33</code></pre>
-<pre class="r"><code>n_distinct(merged_df$date)</code></pre>
-<pre><code>## [1] 31</code></pre>
-<pre class="r"><code>skim_without_charts(daily_sleep)</code></pre>
-<table>
-<caption>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td align="left">Name</td>
-<td align="left">daily_sleep</td>
-</tr>
-<tr class="even">
-<td align="left">Number of rows</td>
-<td align="left">413</td>
-</tr>
-<tr class="odd">
-<td align="left">Number of columns</td>
-<td align="left">5</td>
-</tr>
-<tr class="even">
-<td align="left">_______________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Column type frequency:</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">character</td>
-<td align="left">1</td>
-</tr>
-<tr class="odd">
-<td align="left">numeric</td>
-<td align="left">4</td>
-</tr>
-<tr class="even">
-<td align="left">________________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Group variables</td>
-<td align="left">None</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: character</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
-<th align="right">n_unique</th>
-<th align="right">whitespace</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">date</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">31</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: numeric</strong></p>
-<table style="width:100%;">
-<colgroup>
-<col width="16%" />
-<col width="8%" />
-<col width="11%" />
 <col width="10%" />
 <col width="9%" />
 <col width="8%" />
 <col width="8%" />
-<col width="8%" />
-<col width="8%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
 <col width="8%" />
 </colgroup>
 <thead>
@@ -2054,52 +1391,325 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 <td align="right">1</td>
 <td align="right">5.000979e+09</td>
 <td align="right">2.06036e+09</td>
-<td align="right">1503960366</td>
-<td align="right">3977333714</td>
-<td align="right">4702921684</td>
-<td align="right">6962181067</td>
-<td align="right">8792009665</td>
+<td align="right">1.50396e+09</td>
+<td align="right">3.977334e+09</td>
+<td align="right">4.702922e+09</td>
+<td align="right">6.962181e+09</td>
+<td align="right">8.79201e+09</td>
 </tr>
 <tr class="even">
+<td align="left">total_steps</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">8.541140e+03</td>
+<td align="right">4.15693e+03</td>
+<td align="right">1.70000e+01</td>
+<td align="right">5.206000e+03</td>
+<td align="right">8.925000e+03</td>
+<td align="right">1.139300e+04</td>
+<td align="right">2.27700e+04</td>
+</tr>
+<tr class="odd">
+<td align="left">total_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">6.040000e+00</td>
+<td align="right">3.05000e+00</td>
+<td align="right">1.00000e-02</td>
+<td align="right">3.600000e+00</td>
+<td align="right">6.290000e+00</td>
+<td align="right">8.030000e+00</td>
+<td align="right">1.75400e+01</td>
+</tr>
+<tr class="even">
+<td align="left">tracker_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">6.030000e+00</td>
+<td align="right">3.05000e+00</td>
+<td align="right">1.00000e-02</td>
+<td align="right">3.600000e+00</td>
+<td align="right">6.290000e+00</td>
+<td align="right">8.020000e+00</td>
+<td align="right">1.75400e+01</td>
+</tr>
+<tr class="odd">
+<td align="left">logged_activities_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.100000e-01</td>
+<td align="right">5.10000e-01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">4.08000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">very_active_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.450000e+00</td>
+<td align="right">1.99000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">5.700000e-01</td>
+<td align="right">2.370000e+00</td>
+<td align="right">1.25400e+01</td>
+</tr>
+<tr class="odd">
+<td align="left">moderately_active_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7.500000e-01</td>
+<td align="right">1.00000e+00</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">4.200000e-01</td>
+<td align="right">1.040000e+00</td>
+<td align="right">6.48000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">light_active_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.810000e+00</td>
+<td align="right">1.73000e+00</td>
+<td align="right">1.00000e-02</td>
+<td align="right">2.540000e+00</td>
+<td align="right">3.680000e+00</td>
+<td align="right">4.930000e+00</td>
+<td align="right">9.48000e+00</td>
+</tr>
+<tr class="odd">
+<td align="left">sedentary_active_distance</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.000000e+00</td>
+<td align="right">1.00000e-02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">1.10000e-01</td>
+</tr>
+<tr class="even">
+<td align="left">very_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2.519000e+01</td>
+<td align="right">3.63900e+01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">9.000000e+00</td>
+<td align="right">3.800000e+01</td>
+<td align="right">2.10000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">fairly_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.804000e+01</td>
+<td align="right">2.24000e+01</td>
+<td align="right">0.00000e+00</td>
+<td align="right">0.000000e+00</td>
+<td align="right">1.100000e+01</td>
+<td align="right">2.700000e+01</td>
+<td align="right">1.43000e+02</td>
+</tr>
+<tr class="even">
+<td align="left">lightly_active_minutes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2.168500e+02</td>
+<td align="right">8.71600e+01</td>
+<td align="right">2.00000e+00</td>
+<td align="right">1.580000e+02</td>
+<td align="right">2.080000e+02</td>
+<td align="right">2.630000e+02</td>
+<td align="right">5.18000e+02</td>
+</tr>
+<tr class="odd">
+<td align="left">sedentary_minutes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7.121700e+02</td>
+<td align="right">1.65960e+02</td>
+<td align="right">0.00000e+00</td>
+<td align="right">6.310000e+02</td>
+<td align="right">7.170000e+02</td>
+<td align="right">7.830000e+02</td>
+<td align="right">1.26500e+03</td>
+</tr>
+<tr class="even">
+<td align="left">calories</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2.397570e+03</td>
+<td align="right">7.62890e+02</td>
+<td align="right">2.57000e+02</td>
+<td align="right">1.850000e+03</td>
+<td align="right">2.220000e+03</td>
+<td align="right">2.926000e+03</td>
+<td align="right">4.90000e+03</td>
+</tr>
+<tr class="odd">
 <td align="left">total_sleep_records</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">1.120000e+00</td>
 <td align="right">3.50000e-01</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">3</td>
+<td align="right">1.00000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">1.000000e+00</td>
+<td align="right">3.00000e+00</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">total_minutes_asleep</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">4.194700e+02</td>
 <td align="right">1.18340e+02</td>
-<td align="right">58</td>
-<td align="right">361</td>
-<td align="right">433</td>
-<td align="right">490</td>
-<td align="right">796</td>
+<td align="right">5.80000e+01</td>
+<td align="right">3.610000e+02</td>
+<td align="right">4.330000e+02</td>
+<td align="right">4.900000e+02</td>
+<td align="right">7.96000e+02</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">total_time_in_bed</td>
 <td align="right">0</td>
 <td align="right">1</td>
 <td align="right">4.586400e+02</td>
 <td align="right">1.27100e+02</td>
-<td align="right">61</td>
-<td align="right">403</td>
-<td align="right">463</td>
-<td align="right">526</td>
-<td align="right">961</td>
+<td align="right">6.10000e+01</td>
+<td align="right">4.030000e+02</td>
+<td align="right">4.630000e+02</td>
+<td align="right">5.260000e+02</td>
+<td align="right">9.61000e+02</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>n_distinct(daily_sleep$id)</code></pre>
+<pre class="r"><code>n_distinct(merged_df$id)</code></pre>
 <pre><code>## [1] 24</code></pre>
+<p><code>merged_df</code> looks clean and ready to be analyzed.</p>
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class="blue">
+<p><strong>3. Documentation of any cleaning or manipulation of data:</strong></p>
+<ul>
+<li><p>Used tidyverse (dplyr), janitor, lubridate, and skimr packages.</p></li>
+<li><p>Converted all column names from pascal case to camel case.</p></li>
+<li><p>Renamed ‘activity_date’ and ‘sleep_day’ columns in <code>daily_act</code> and <code>daily_sleep</code>, respectively, to ‘date’.</p></li>
+<li><p>Converted ‘date’ columns in <code>daily_act</code> and <code>daily_sleep</code> from character (string) data type to date data type.</p></li>
+<li><p><code>daily_act</code> has no missing (NA) values.</p></li>
+<li><p><code>daily_sleep</code> has no missing (NA) values.</p></li>
+<li><p>Merged <code>daily_act</code> and <code>daily_sleep</code> into <code>merged_df</code> using an inner join.</p></li>
+</ul>
+</div>
+</div>
+<div id="analyze" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Analyze</h1>
+<p>Let’s take a closer look into <code>merged_df</code>.</p>
+<pre class="r"><code>head(merged_df)</code></pre>
+<pre><code>## # A tibble: 6 x 18
+##       id date       total_steps total_distance tracker_distance logged_activiti~
+##    &lt;dbl&gt; &lt;date&gt;           &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 1.50e9 2016-04-12       13162           8.5              8.5                 0
+## 2 1.50e9 2016-04-13       10735           6.97             6.97                0
+## 3 1.50e9 2016-04-15        9762           6.28             6.28                0
+## 4 1.50e9 2016-04-16       12669           8.16             8.16                0
+## 5 1.50e9 2016-04-17        9705           6.48             6.48                0
+## 6 1.50e9 2016-04-19       15506           9.88             9.88                0
+## # ... with 12 more variables: very_active_distance &lt;dbl&gt;,
+## #   moderately_active_distance &lt;dbl&gt;, light_active_distance &lt;dbl&gt;,
+## #   sedentary_active_distance &lt;dbl&gt;, very_active_minutes &lt;dbl&gt;,
+## #   fairly_active_minutes &lt;dbl&gt;, lightly_active_minutes &lt;dbl&gt;,
+## #   sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;, total_sleep_records &lt;dbl&gt;,
+## #   total_minutes_asleep &lt;dbl&gt;, total_time_in_bed &lt;dbl&gt;</code></pre>
+<pre class="r"><code># Add day of the week column
+day_of_week &lt;- wday(merged_df$date, label=TRUE)
+merged_df &lt;- add_column(merged_df, day_of_week, .after=&#39;date&#39;)</code></pre>
+<pre class="r"><code># Check if tracker_distance and total_distance are the same columns
+sum(ifelse(merged_df$total_distance != merged_df$tracker_distance, 1, 0))</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>merged_df %&gt;% 
+  filter(total_distance != tracker_distance)</code></pre>
+<pre><code>## # A tibble: 3 x 19
+##           id date       day_of_week total_steps total_distance tracker_distance
+##        &lt;dbl&gt; &lt;date&gt;     &lt;ord&gt;             &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;
+## 1 6962181067 2016-04-21 Thu               11835           9.71             7.88
+## 2 6962181067 2016-04-25 Mon               13239           9.27             9.08
+## 3 6962181067 2016-05-09 Mon               12342           8.72             8.68
+## # ... with 13 more variables: logged_activities_distance &lt;dbl&gt;,
+## #   very_active_distance &lt;dbl&gt;, moderately_active_distance &lt;dbl&gt;,
+## #   light_active_distance &lt;dbl&gt;, sedentary_active_distance &lt;dbl&gt;,
+## #   very_active_minutes &lt;dbl&gt;, fairly_active_minutes &lt;dbl&gt;,
+## #   lightly_active_minutes &lt;dbl&gt;, sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;,
+## #   total_sleep_records &lt;dbl&gt;, total_minutes_asleep &lt;dbl&gt;,
+## #   total_time_in_bed &lt;dbl&gt;</code></pre>
+<p>It looks like tracker_distance has the same values as total_distance except for 3 rows, of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.</p>
+<pre class="r"><code># logged_activities_distance values
+n_distinct(merged_df$logged_activities_distance)</code></pre>
+<pre><code>## [1] 6</code></pre>
+<pre class="r"><code>table(merged_df$logged_activities_distance)</code></pre>
+<pre><code>## 
+##                0  2.0921471118927 2.25308108329773 2.78517508506775 
+##              393               10                7                1 
+## 3.16782188415527 4.08169221878052 
+##                1                1</code></pre>
+<pre class="r"><code>subset(merged_df, logged_activities_distance %in% c(
+  2.0921471118927,
+  2.25308108329773,
+  2.78517508506775,
+  3.16782188415527,
+  4.08169221878052
+))</code></pre>
+<pre><code>## # A tibble: 20 x 19
+##            id date       day_of_week total_steps total_distance tracker_distance
+##         &lt;dbl&gt; &lt;date&gt;     &lt;ord&gt;             &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;
+##  1 6962181067 2016-04-21 Thu               11835           9.71             7.88
+##  2 6962181067 2016-04-25 Mon               13239           9.27             9.08
+##  3 6962181067 2016-05-09 Mon               12342           8.72             8.68
+##  4 8378563200 2016-04-12 Tue                7626           6.05             6.05
+##  5 8378563200 2016-04-13 Wed               12386           9.82             9.82
+##  6 8378563200 2016-04-14 Thu               13318          10.6             10.6 
+##  7 8378563200 2016-04-18 Mon               13630          10.8             10.8 
+##  8 8378563200 2016-04-19 Tue               13070          10.4             10.4 
+##  9 8378563200 2016-04-20 Wed                9388           7.44             7.44
+## 10 8378563200 2016-04-21 Thu               15148          12.0             12.0 
+## 11 8378563200 2016-04-22 Fri               12200           9.67             9.67
+## 12 8378563200 2016-04-25 Mon               12405           9.84             9.84
+## 13 8378563200 2016-04-25 Mon               12405           9.84             9.84
+## 14 8378563200 2016-05-02 Mon                6064           4.81             4.81
+## 15 8378563200 2016-05-03 Tue                8712           6.91             6.91
+## 16 8378563200 2016-05-05 Thu                8567           6.79             6.79
+## 17 8378563200 2016-05-06 Fri                7045           5.59             5.59
+## 18 8378563200 2016-05-09 Mon                8382           6.65             6.65
+## 19 8378563200 2016-05-10 Tue                6582           5.22             5.22
+## 20 8378563200 2016-05-11 Wed                9143           7.25             7.25
+## # ... with 13 more variables: logged_activities_distance &lt;dbl&gt;,
+## #   very_active_distance &lt;dbl&gt;, moderately_active_distance &lt;dbl&gt;,
+## #   light_active_distance &lt;dbl&gt;, sedentary_active_distance &lt;dbl&gt;,
+## #   very_active_minutes &lt;dbl&gt;, fairly_active_minutes &lt;dbl&gt;,
+## #   lightly_active_minutes &lt;dbl&gt;, sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;,
+## #   total_sleep_records &lt;dbl&gt;, total_minutes_asleep &lt;dbl&gt;,
+## #   total_time_in_bed &lt;dbl&gt;</code></pre>
+<p>So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users. Additionally, I’m not sure what logged_activities_distance represents, as it is different from total_distance and from (very, moderately, light, sedentary) active distance.</p>
+<p>With no context and the majority of values 0, I will drop this column as well.</p>
+<pre class="r"><code># Drop tracker_distance and logged_activities_distance
+merged_df &lt;- merged_df %&gt;% 
+  select(-c(tracker_distance, logged_activities_distance))</code></pre>
+<pre class="r"><code>n_distinct(merged_df$sedentary_active_distance)</code></pre>
+<pre><code>## [1] 7</code></pre>
+<pre class="r"><code>table(merged_df$sedentary_active_distance)</code></pre>
+<pre><code>## 
+##                   0 0.00999999977648258  0.0399999991059303  0.0500000007450581 
+##                 407                   1                   1                   1 
+##  0.0700000002980232   0.100000001490116   0.109999999403954 
+##                   1                   1                   1</code></pre>
 </div>
 
 
