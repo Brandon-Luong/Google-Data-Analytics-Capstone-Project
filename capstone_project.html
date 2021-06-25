@@ -1269,7 +1269,7 @@ daily_sleep$date &lt;- as_date(
 <blockquote>
 <p>Recall that there are 33 users in <code>daily_act</code> but only 24 users in <code>daily_sleep</code>.</p>
 </blockquote>
-<p>In the ideal scenario, I would use a full outer join and fill in the missing values, but because <code>daily_sleep</code> is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.</p>
+<p>In an ideal scenario, I would use a full outer join and fill in the missing values, but because <code>daily_sleep</code> is missing 9 users, I can not simply fill in with the average sleep time. This is because the dataset is already very small and does not accurately represent the population such that imputing the mean may actually skew possible trends.</p>
 <p>For this reason, I will use an inner join. This limits the dataset even further to just 24 users.</p>
 <pre class="r"><code># Merge dataframes
 merged_df &lt;- inner_join(daily_act, daily_sleep, by = c(&#39;id&#39;, &#39;date&#39;))</code></pre>
@@ -1650,8 +1650,8 @@ sum(ifelse(merged_df$total_distance != merged_df$tracker_distance, 1, 0))</code>
 ## #   lightly_active_minutes &lt;dbl&gt;, sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;,
 ## #   total_sleep_records &lt;dbl&gt;, total_minutes_asleep &lt;dbl&gt;,
 ## #   total_time_in_bed &lt;dbl&gt;</code></pre>
-<p>It looks like tracker_distance has the same values as total_distance except for 3 rows, of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.</p>
-<pre class="r"><code># logged_activities_distance values
+<p>It looks like tracker_distance has the same values as total_distance except for 3 rows (0.7% difference), of which come from the same user. I think I can safely drop tracker_distance and use total_distance instead.</p>
+<pre class="r"><code># Check logged_activities_distance values
 n_distinct(merged_df$logged_activities_distance)</code></pre>
 <pre><code>## [1] 6</code></pre>
 <pre class="r"><code>table(merged_df$logged_activities_distance)</code></pre>
@@ -1697,11 +1697,9 @@ n_distinct(merged_df$logged_activities_distance)</code></pre>
 ## #   lightly_active_minutes &lt;dbl&gt;, sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;,
 ## #   total_sleep_records &lt;dbl&gt;, total_minutes_asleep &lt;dbl&gt;,
 ## #   total_time_in_bed &lt;dbl&gt;</code></pre>
-<p>So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users. Additionally, I’m not sure what logged_activities_distance represents, as it is different from total_distance and from (very, moderately, light, sedentary) active distance.</p>
-<p>With no context and the majority of values 0, I will drop this column as well.</p>
-<pre class="r"><code># Drop tracker_distance and logged_activities_distance
-merged_df &lt;- merged_df %&gt;% 
-  select(-c(tracker_distance, logged_activities_distance))</code></pre>
+<p>So it looks like the majority of logged_activities_distance values were never recorded. The only values, other than 0, are from 2 users.</p>
+<p>From user id=8378563200, the value=2.0921471118927 was recorded 10 times, and the value=2.25308108329773 was recorded 7 times. I suspect that logged_activities_distance represents manual recordings by the user because it is easier to believe that the user inputted the same distance rather than the user totaling the exact same distance 10 and 7 times across different days.</p>
+<p>With no actual context (besides suspicion) and the majority of values equaling 0 (95% value=0), I will drop this column as well.</p>
 <pre class="r"><code>n_distinct(merged_df$sedentary_active_distance)</code></pre>
 <pre><code>## [1] 7</code></pre>
 <pre class="r"><code>table(merged_df$sedentary_active_distance)</code></pre>
@@ -1710,6 +1708,54 @@ merged_df &lt;- merged_df %&gt;%
 ##                 407                   1                   1                   1 
 ##  0.0700000002980232   0.100000001490116   0.109999999403954 
 ##                   1                   1                   1</code></pre>
+<pre class="r"><code>3/413</code></pre>
+<pre><code>## [1] 0.007263923</code></pre>
+<p>Similarly, sedentary_active_distance has a majority of 0 values (98.5% value=0). This result makes sense because if you are sedentary (mostly sitting as opposed to walking or running), you won’t be covering much distance if at all. So the non-zero values are actually the outliers here and are maybe due to rolling around during sleep.</p>
+<p>Because of this, I can also safely drop this column as well.</p>
+<pre class="r"><code># Drop tracker_distance, logged_activities_distance, sedentary_active_distance
+merged_df &lt;- merged_df %&gt;% 
+  select(-c(
+    tracker_distance, 
+    logged_activities_distance,
+    sedentary_active_distance))
+
+head(merged_df)</code></pre>
+<pre><code>## # A tibble: 6 x 16
+##          id date       day_of_week total_steps total_distance very_active_dista~
+##       &lt;dbl&gt; &lt;date&gt;     &lt;ord&gt;             &lt;dbl&gt;          &lt;dbl&gt;              &lt;dbl&gt;
+## 1    1.50e9 2016-04-12 Tue               13162           8.5                1.88
+## 2    1.50e9 2016-04-13 Wed               10735           6.97               1.57
+## 3    1.50e9 2016-04-15 Fri                9762           6.28               2.14
+## 4    1.50e9 2016-04-16 Sat               12669           8.16               2.71
+## 5    1.50e9 2016-04-17 Sun                9705           6.48               3.19
+## 6    1.50e9 2016-04-19 Tue               15506           9.88               3.53
+## # ... with 10 more variables: moderately_active_distance &lt;dbl&gt;,
+## #   light_active_distance &lt;dbl&gt;, very_active_minutes &lt;dbl&gt;,
+## #   fairly_active_minutes &lt;dbl&gt;, lightly_active_minutes &lt;dbl&gt;,
+## #   sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;, total_sleep_records &lt;dbl&gt;,
+## #   total_minutes_asleep &lt;dbl&gt;, total_time_in_bed &lt;dbl&gt;</code></pre>
+<pre class="r"><code># Convert sleep time from minutes to hours
+merged_df &lt;- merged_df %&gt;% 
+  mutate(
+    hours_asleep = total_minutes_asleep / 60,
+    hours_in_bed = total_time_in_bed / 60)
+
+head(merged_df)</code></pre>
+<pre><code>## # A tibble: 6 x 18
+##          id date       day_of_week total_steps total_distance very_active_dista~
+##       &lt;dbl&gt; &lt;date&gt;     &lt;ord&gt;             &lt;dbl&gt;          &lt;dbl&gt;              &lt;dbl&gt;
+## 1    1.50e9 2016-04-12 Tue               13162           8.5                1.88
+## 2    1.50e9 2016-04-13 Wed               10735           6.97               1.57
+## 3    1.50e9 2016-04-15 Fri                9762           6.28               2.14
+## 4    1.50e9 2016-04-16 Sat               12669           8.16               2.71
+## 5    1.50e9 2016-04-17 Sun                9705           6.48               3.19
+## 6    1.50e9 2016-04-19 Tue               15506           9.88               3.53
+## # ... with 12 more variables: moderately_active_distance &lt;dbl&gt;,
+## #   light_active_distance &lt;dbl&gt;, very_active_minutes &lt;dbl&gt;,
+## #   fairly_active_minutes &lt;dbl&gt;, lightly_active_minutes &lt;dbl&gt;,
+## #   sedentary_minutes &lt;dbl&gt;, calories &lt;dbl&gt;, total_sleep_records &lt;dbl&gt;,
+## #   total_minutes_asleep &lt;dbl&gt;, total_time_in_bed &lt;dbl&gt;, hours_asleep &lt;dbl&gt;,
+## #   hours_in_bed &lt;dbl&gt;</code></pre>
 </div>
 
 

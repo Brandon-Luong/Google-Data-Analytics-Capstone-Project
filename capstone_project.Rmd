@@ -581,3 +581,59 @@ merged_df <- merged_df %>%
 head(merged_df)
 ```
 
+```{r}
+# Average steps taken on a given day
+merged_df %>% 
+  group_by(day_of_week) %>% 
+  summarise(average_sleep_hours = mean(hours_asleep))
+```
+
+```{r}
+only_variables <- merged_df %>% 
+  select(4:18)
+
+round(cor(only_variables), 2)
+```
+
+
+
+```{r}
+# Average steps taken on a given day
+merged_df %>% 
+  group_by(day_of_week) %>% 
+  summarise(average_sleep_hours = mean(hours_asleep))
+```
+```{r}
+# Average steps taken on a given day
+merged_df %>% 
+  group_by(day_of_week) %>% 
+  summarise(average_distance = mean(total_distance))
+```
+
+```{r}
+# Average steps taken on a given day
+merged_df %>% 
+  group_by(day_of_week) %>% 
+  summarise(average_cal = mean(calories))
+```
+
+```{r}
+table(merged_df$day_of_week)
+```
+
+```{r}
+merged_df %>% 
+  group_by(id) %>% 
+  summarise(day_freq = n_distinct(day_of_week))
+```
+
+```{r}
+ggplot(data=merged_df) + 
+  geom_point(mapping = aes(x=day_of_week, y=total_steps))
+```
+
+```{r}
+ggplot(data=merged_df) + 
+  geom_point(mapping = aes(x=total_steps, y=calories)) + 
+  geom_smooth(mapping = aes(x=total_steps, y=calories))
+```
