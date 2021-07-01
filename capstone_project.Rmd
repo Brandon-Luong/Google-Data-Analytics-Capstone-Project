@@ -80,6 +80,7 @@ library(tidyverse) # General purpose data science package
 library(janitor) # Data cleaning
 library(lubridate) # Date parsing and cleaning
 library(skimr) # Viewing
+library(patchwork) #ggplots helper
 ```
 
 ## Import csv files
@@ -619,33 +620,29 @@ Interestingly enough, Wednesday has the 2nd most hours slept on average. This co
 
 ## Plots
 
+Let's plot total_steps, total_distance, and calories vs day_of_week so that the data is viewed visually.
+
 ```{r}
 ggplot(data = merged_df) + 
   geom_boxplot(mapping = aes(x=day_of_week, y=total_steps, color=day_of_week), notch=TRUE) + 
-  scale_y_continuous(n.breaks = 6)
+  scale_y_continuous(n.breaks = 10)
 ```
-
-
-
-
 
 ```{r}
-ggplot(data=merged_df) + 
-  geom_point(mapping = aes(x=total_steps, y=calories)) + 
-  geom_smooth(mapping = aes(x=total_steps, y=calories))
+ggplot(data = merged_df) + 
+  geom_boxplot(mapping = aes(x=day_of_week, y=total_distance, color=day_of_week), notch=TRUE) + 
+  scale_y_continuous(n.breaks = 10)
 ```
-
-
 
 ```{r}
-ggplot(data = merged_df) +
-  geom_point(mapping = aes(x=hours_in_bed, y=hours_asleep)) + 
-  geom_smooth(mapping = aes(x=hours_in_bed, y=hours_asleep))
+ggplot(data = merged_df) + 
+  geom_boxplot(mapping = aes(x=day_of_week, y=calories, color=day_of_week), notch=TRUE) + 
+  scale_y_continuous(n.breaks = 10)
 ```
 
+From these plots, Sunday and Saturday are indeed the least active and most active days of the week. However, when looking at the calories burned plot, most of the notches overlap meaning that although Sunday is the least active day and Saturday the most active day, in terms of calories burned, they are not statistically significant enough.
 
-
-
+Let's take a look at hours_asleep vs day_of_week.
 
 ```{r}
 merged_df %>% 
@@ -654,4 +651,52 @@ merged_df %>%
   scale_y_continuous(n.breaks = 6)
 ```
 
-As expected, the average hours of sleep per day is about 7 hours, except for Sunday for which its average is 8 hours (though a 1 hour difference isn't that significant). This can likely correspond to "lazy Sundays" in which people tend to sleep in after a night of drinking or going out on Saturday. Saturday and Sunday also have the largest range of values (ie. largest boxes) which can correspond with people's weekend plans. Contrasting this with Monday to Friday, the "work days," in which the boxes are much smaller meaning they mostly slept on a consistent schedule.
+As expected, the average hours of sleep per day is about 7 hours, except for Sunday for which its average is 8 hours (though a 1 hour difference is not statistically significant). This plot further supports the idea of "lazy Sundays." Saturday and Sunday also have the largest range of values (ie. largest boxes) which can correspond with people's weekend plans which can vary widely between users. Contrasting this with Monday to Friday, the "work days," in which the boxes are much smaller meaning they mostly slept on a consistent schedule.
+
+Let's take a look at hours_asleep vs hours_in_bed.
+
+```{r}
+ggplot(data = merged_df) +
+  geom_point(mapping = aes(x=hours_in_bed, y=hours_asleep)) + 
+  geom_smooth(mapping = aes(x=hours_in_bed, y=hours_asleep)) +
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(n.breaks = 8)
+```
+
+Overall, this plot is consistent with the fact that most of the time spent asleep is the same as the time spent in bed. There are a couple of outliers in which some users were unable to sleep causing them to have a lower hours_asleep to hours_in_bed ratio.
+
+Now let's try to figure out why calories burned isn't statistically significant for Sunday and Saturday.
+
+
+```{r}
+ggplot(data=merged_df) + 
+  geom_point(mapping = aes(x=total_steps, y=calories)) + 
+  geom_smooth(mapping = aes(x=total_steps, y=calories)) + 
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(n.breaks = 10)
+```
+
+Comparing calories vs total_steps, there seems to be a general trend that more steps means more calories burned. But the range of values for each step value is quite large (eg. at 10,000 total steps, calories burned ranges from 1500 to 3500), so much so that the best fit line is a little misleading and inaccurate.
+
+Let's compare the intensities (very_active_distance, moderately_active_distance, light_active_distance) vs calories.
+
+```{r}
+very_active_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=very_active_distance, y=calories)) + 
+  geom_smooth(mapping = aes(x=very_active_distance, y=calories))
+
+moderately_active_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=moderately_active_distance, y=calories)) +
+  geom_smooth(mapping = aes(x=moderately_active_distance, y=calories))
+
+light_active_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=light_active_distance, y=calories)) + 
+  geom_smooth(mapping = aes(x=light_active_distance, y=calories))
+
+(very_active_dist_plot | moderately_active_dist_plot) / light_active_dist_plot
+```
+
+
+
+
+
