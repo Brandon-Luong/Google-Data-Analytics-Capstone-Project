@@ -80,7 +80,7 @@ library(tidyverse) # General purpose data science package
 library(janitor) # Data cleaning
 library(lubridate) # Date parsing and cleaning
 library(skimr) # Viewing
-library(patchwork) #ggplots helper
+library(patchwork) #ggplot helper
 ```
 
 ## Import csv files
@@ -555,56 +555,84 @@ With no actual context (besides suspicion) and the majority of values equaling 0
 n_distinct(merged_df$sedentary_active_distance)
 table(merged_df$sedentary_active_distance)
 ```
-```{r}
-3/413
-```
 
 Similarly, sedentary_active_distance has a majority of 0 values (98.5% value=0). This result makes sense because if you are sedentary (mostly sitting as opposed to walking or running), you won't be covering much distance if at all. So the non-zero values are actually the outliers here and are maybe due to rolling around during sleep.
 
 Because of this, I can also safely drop this column as well.
 
+Now, I want to figure out what total_sleep_records is supposed to represent.
+
 ```{r}
-# Drop tracker_distance, logged_activities_distance, sedentary_active_distance
+n_distinct(merged_df$total_sleep_records)
+table(merged_df$total_sleep_records)
+```
+
+I'm not sure how useful total_sleep_records is as 88.8% are 1, 10% are 2, and 0.72% are 3. The majority of the observations are 1 sleep record, which I can only assume as to mean that most users did not wake up in the middle of the night, and some had to wake up to use the bathroom. This doesn't provide any interesting information, so I will drop this column.
+
+```{r}
+# Drop tracker_distance, logged_activities_distance, sedentary_active_distance, total_sleep_records
 merged_df <- merged_df %>% 
   select(-c(
     tracker_distance, 
     logged_activities_distance,
-    sedentary_active_distance))
+    sedentary_active_distance,
+    total_sleep_records))
 
 head(merged_df)
 ```
 
-Because most people often talk about how many hours they have slept as opposed to how many minutes, I will add new columns for sleep hours.
+Because most people often talk about how many hours they have slept as opposed to how many minutes, I will add new columns for sleep hours and use those instead.
 
 ```{r}
 # Convert sleep time from minutes to hours
 merged_df <- merged_df %>% 
   mutate(
-    hours_asleep = total_minutes_asleep / 60,
-    hours_in_bed = total_time_in_bed / 60)
+    sleep_hours = total_minutes_asleep / 60,
+    in_bed_hours = total_time_in_bed / 60) %>% 
+  select(-c(total_minutes_asleep, total_time_in_bed))
 
 head(merged_df)
 ```
+
+To finish off formatting the data, I want to rename all the columns into more meaningful names.
+
+```{r}
+merged_df <- merged_df %>% 
+  rename(steps = total_steps,
+         distance = total_distance,
+         sprint_distance = very_active_distance,
+         jog_distance = moderately_active_distance,
+         walk_distance = light_active_distance,
+         sprint_minutes = very_active_minutes,
+         jog_minutes = fairly_active_minutes,
+         walk_minutes = lightly_active_minutes)
+
+head(merged_df)
+```
+
+Okay, now it's time to start analyzing and answer one of my main questions:
+
+**1. What are some trends in smart device usage?**
 
 ```{r}
 # Average steps taken per day
 merged_df %>% 
   group_by(day_of_week) %>% 
-  summarise(average_daily_steps = mean(total_steps))
+  summarise(average_steps = mean(steps))
 ```
 
 ```{r}
 # Average distance covered per day
 merged_df %>% 
   group_by(day_of_week) %>% 
-  summarise(average_distance = mean(total_distance))
+  summarise(average_distance = mean(distance))
 ```
 
 ```{r}
 # Average calories burned per day
 merged_df %>% 
   group_by(day_of_week) %>% 
-  summarise(average_cal = mean(calories))
+  summarise(average_calories = mean(calories))
 ```
 
 From these 3 calculations, on average, Sunday is the least active day and Saturday is the most active day. This would make sense because Saturday is the start of the weekend, and people have more free time to exercise or go out for drinks and socialize. Sunday, on the other hand, could be due to "lazy Sundays" in which people tend to not be as active and stay indoors to relax.
@@ -613,24 +641,24 @@ From these 3 calculations, on average, Sunday is the least active day and Saturd
 # Average hours slept per day
 merged_df %>% 
   group_by(day_of_week) %>% 
-  summarise(average_sleep_hours = mean(hours_asleep))
+  summarise(average_sleep_hours = mean(sleep_hours))
 ```
 
-Interestingly enough, Wednesday has the 2nd most hours slept on average. This could maybe be accredited to Wednesday's "hump day" in which people tend to feel tired and sluggish during the middle of the work week.
+As suspected, Sunday has the most average hours slept. Interestingly enough, Wednesday has the 2nd most average hours slept. This could maybe be accredited to Wednesday's "hump day" in which people tend to feel tired and sluggish during the middle of the work week.
 
 ## Plots
 
-Let's plot total_steps, total_distance, and calories vs day_of_week so that the data is viewed visually.
+Let's plot steps, distance, and calories vs day_of_week so that the data is viewed visually.
 
 ```{r}
 ggplot(data = merged_df) + 
-  geom_boxplot(mapping = aes(x=day_of_week, y=total_steps, color=day_of_week), notch=TRUE) + 
+  geom_boxplot(mapping = aes(x=day_of_week, y=steps, color=day_of_week), notch=TRUE) + 
   scale_y_continuous(n.breaks = 10)
 ```
 
 ```{r}
 ggplot(data = merged_df) + 
-  geom_boxplot(mapping = aes(x=day_of_week, y=total_distance, color=day_of_week), notch=TRUE) + 
+  geom_boxplot(mapping = aes(x=day_of_week, y=distance, color=day_of_week), notch=TRUE) + 
   scale_y_continuous(n.breaks = 10)
 ```
 
@@ -642,61 +670,148 @@ ggplot(data = merged_df) +
 
 From these plots, Sunday and Saturday are indeed the least active and most active days of the week. However, when looking at the calories burned plot, most of the notches overlap meaning that although Sunday is the least active day and Saturday the most active day, in terms of calories burned, they are not statistically significant enough.
 
-Let's take a look at hours_asleep vs day_of_week.
+Let's take a look at sleep_hours vs day_of_week.
 
 ```{r}
 merged_df %>% 
   ggplot() + 
-  geom_boxplot(mapping = aes(x=day_of_week, y=hours_asleep, color=day_of_week)) + 
+  geom_boxplot(mapping = aes(x=day_of_week, y=sleep_hours, color=day_of_week)) + 
   scale_y_continuous(n.breaks = 6)
 ```
 
-As expected, the average hours of sleep per day is about 7 hours, except for Sunday for which its average is 8 hours (though a 1 hour difference is not statistically significant). This plot further supports the idea of "lazy Sundays." Saturday and Sunday also have the largest range of values (ie. largest boxes) which can correspond with people's weekend plans which can vary widely between users. Contrasting this with Monday to Friday, the "work days," in which the boxes are much smaller meaning they mostly slept on a consistent schedule.
+As expected, the average hours of sleep per day is about 7 hours, except for Sunday for which its average is 8 hours (though a 1 hour difference is not statistically significant). This plot further supports the idea of "lazy Sundays." Saturday and Sunday also have the largest range of values (ie. largest boxes) which can correspond with people's weekend plans which can vary widely between users. Contrasting this with Monday to Friday, the "work days" have much smaller boxes meaning the users mostly slept on a consistent schedule.
 
-Let's take a look at hours_asleep vs hours_in_bed.
+Let's take a look at sleep_hours vs in_bed_hours.
 
 ```{r}
 ggplot(data = merged_df) +
-  geom_point(mapping = aes(x=hours_in_bed, y=hours_asleep)) + 
-  geom_smooth(mapping = aes(x=hours_in_bed, y=hours_asleep)) +
+  geom_point(mapping = aes(x=in_bed_hours, y=sleep_hours)) + 
+  geom_smooth(mapping = aes(x=in_bed_hours, y=sleep_hours)) +
   scale_x_continuous(n.breaks = 10) +
   scale_y_continuous(n.breaks = 8)
 ```
 
-Overall, this plot is consistent with the fact that most of the time spent asleep is the same as the time spent in bed. There are a couple of outliers in which some users were unable to sleep causing them to have a lower hours_asleep to hours_in_bed ratio.
+Overall, this plot is consistent with the fact that most of the time spent asleep is about the same as the time spent in bed. There are a couple of outliers in which some users were unable to sleep causing them to have a lower sleep_hours to in_bed_hours ratio.
 
 Now let's try to figure out why calories burned isn't statistically significant for Sunday and Saturday.
 
-
 ```{r}
-ggplot(data=merged_df) + 
-  geom_point(mapping = aes(x=total_steps, y=calories)) + 
-  geom_smooth(mapping = aes(x=total_steps, y=calories)) + 
+steps_plot <- ggplot(data=merged_df) + 
+  geom_point(mapping = aes(x=steps, y=calories)) + 
+  geom_smooth(mapping = aes(x=steps, y=calories)) + 
   scale_x_continuous(n.breaks = 10) +
   scale_y_continuous(n.breaks = 10)
+
+dist_plot <- ggplot(data=merged_df) + 
+  geom_point(mapping = aes(x=distance, y=calories)) + 
+  geom_smooth(mapping = aes(x=distance, y=calories)) + 
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(n.breaks = 10)
+
+steps_plot / dist_plot
 ```
 
-Comparing calories vs total_steps, there seems to be a general trend that more steps means more calories burned. But the range of values for each step value is quite large (eg. at 10,000 total steps, calories burned ranges from 1500 to 3500), so much so that the best fit line is a little misleading and inaccurate.
+Comparing calories vs steps, there seems to be a general trend that more steps mean more calories burned. But the range of values for each step value is quite large (eg. at 10,000 total steps, calories burned ranges from 1500 to 3500), so much so that the best fit line is a little misleading and inaccurate. Similarly, calories vs distance has this same general trend but is also too inaccurate.
 
-Let's compare the intensities (very_active_distance, moderately_active_distance, light_active_distance) vs calories.
+Let's compare the intensities distance (sprint_distance, jog_distance, walk_distance) vs calories.
 
 ```{r}
-very_active_dist_plot <- ggplot(data = merged_df) + 
-  geom_point(mapping = aes(x=very_active_distance, y=calories)) + 
-  geom_smooth(mapping = aes(x=very_active_distance, y=calories))
+sprint_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=sprint_distance, y=calories)) + 
+  geom_smooth(mapping = aes(x=sprint_distance, y=calories))
 
-moderately_active_dist_plot <- ggplot(data = merged_df) + 
-  geom_point(mapping = aes(x=moderately_active_distance, y=calories)) +
-  geom_smooth(mapping = aes(x=moderately_active_distance, y=calories))
+jog_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=jog_distance, y=calories)) +
+  geom_smooth(mapping = aes(x=jog_distance, y=calories))
 
-light_active_dist_plot <- ggplot(data = merged_df) + 
-  geom_point(mapping = aes(x=light_active_distance, y=calories)) + 
-  geom_smooth(mapping = aes(x=light_active_distance, y=calories))
+walk_dist_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=walk_distance, y=calories)) + 
+  geom_smooth(mapping = aes(x=walk_distance, y=calories))
 
-(very_active_dist_plot | moderately_active_dist_plot) / light_active_dist_plot
+(sprint_dist_plot | jog_dist_plot) / walk_dist_plot
 ```
 
+It's clear from these plots that walk_distance is the only one with a positive correlation with calories (calories increase as walk_distance increases). Both sprint_distance and jog_distance start off with a positive slope (ie. positive correlation) but jog_distance becomes negative close to 1, whereas sprint_distance is negative until after 2 then starts it is positive again.
+
+Translating to what this actually means, all 3 types of intensities initially burn calories. However, walking is the only one that burns calories at an increasing rate as the user walks for a farther distance. Jogging actually burns less calories at longer distances, and sprinting does burn calories at an increasing rate only if it is sustained (which goes against the whole point of sprinting "high energy for short distance").
+
+With this in mind, I now want to look at intensity duration (sprint_minutes, jog_minutes, walk_minutes, sedentary_minutes) vs calories.
+
+```{r}
+ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=sedentary_minutes, y=calories)) + 
+  geom_smooth(mapping = aes(x=sedentary_minutes, y=calories))
+```
+
+Again, the best fit line is inaccurate given the data because there is a wide range of values from 500-1000 sedentary minutes. It is difficult to conclude if sedentary_minutes correlate with calories, but you still burn a base number of calories even while sitting down - the 1 MET.
 
 
+```{r}
+sprint_min_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=sprint_minutes, y=calories)) + 
+  geom_smooth(mapping = aes(x=sprint_minutes, y=calories))
 
+jog_min_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=jog_minutes, y=calories)) +
+  geom_smooth(mapping = aes(x=jog_minutes, y=calories))
 
+walk_min_plot <- ggplot(data = merged_df) + 
+  geom_point(mapping = aes(x=walk_minutes, y=calories)) + 
+  geom_smooth(mapping = aes(x=walk_minutes, y=calories))
+
+(sprint_min_plot | jog_min_plot) / walk_min_plot
+```
+
+These plots follow the exact same trend as the intensities distance (sprint_distance, jog_distance, walk_distance). All of them initially burn calories at an increasing rate, but only continually walking burns calories at an increasing rate. Jogging for a longer time actually decreases calories burned, and sprinting for a longer time is projected to burn a lot of calories - but again, sprints are not meant to be performed for a  long duration.
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**4. A summary of your analysis**
+
+Drop columns:
+
+- tracker_distance
+  - Identical to total_distance, except for 3 rows (0.7% difference).
+- logged_activities_distance
+  - 95% of values equal 0.
+  - Remaining values recorded by 2 users.
+- sedentary_active_distance 
+  - 98.5% of values equal 0. 
+  - Sedentary (mostly sitting as opposed to walking or running) won't be covering much distance if at all.
+- total_sleep_records
+  - 88.8% are 1, 10% are 2, and 0.72% are 3. 
+  - The majority of the observations are 1 sleep record (ie. did not wake up during the middle of the night).
+  
+Add columns:
+
+- day_of_week
+  - Convert date to the day of the week.
+- sleep_hours
+  - Convert total_minutes_asleep to hours slept.
+- in_bed_hours
+  - Convert total_time_in_bed to hours in bed.
+
+Trends:
+
+- Sunday is the least active day.
+  - Lowest average steps and distance.
+  - Highest number of hours slept.
+  - "Lazy Sunday": relax indoors.
+- Saturday is the most active day.
+  - Highest average steps and distance.
+  - Lowest number of hours slept.
+  - Free time on Saturday to exercise, go out and have drinks, and socialize.
+- Wednesday is the 2nd most hours slept day.
+  - "Hump Day": mid-work week tiredness and slump.
+  
+- Users slept more consistently on the weekdays vs the weekends.
+- Users did not have any trouble sleeping.
+  - in_bed_hours about the same as sleep_hours.
+  
+- Walking burns more calories than jogging or sprinting when performed for a longer duration or distance.
+</div>
+
+# Share
