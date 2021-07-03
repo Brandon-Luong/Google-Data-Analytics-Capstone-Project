@@ -9,7 +9,7 @@ The complete project, with code and analysis, can be found in the "capstone_proj
 
 I have chosen to do this project in R because the dataset file size is too large to comfortably work in spreadsheets (Excel/Google Sheets). This project can be done in SQL, but R has many handy packages such as tidyverse for data cleaning and analysis.
 
-![](Presentation_Pictures\bellabeat_logo.png)
+![](Presentation_Pictures/bellabeat_logo.png)
 
 ## 2. Overview of Bellabeat and Objectives
 
