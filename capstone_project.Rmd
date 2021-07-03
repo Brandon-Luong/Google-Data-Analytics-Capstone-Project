@@ -1088,26 +1088,23 @@ These trends:
 
 # Act
 
-Now that I have presented my findings and how they relate to Bellabeat customers, I will give my recommendations to improve the Bellabeat app as it is the main product that all customers interface with. The Bellabeat app tracks user activity, sleep, stress, menstrual cycle, and mindfulness habits.
+Now that I have presented my findings and how they relate to Bellabeat customers, I will answer the last main question:
 
-The Fitbit data did not contain any information regarding menstrual cycles, so I have no recommendations for that particular subject.
+**3. How could these trends help influence Bellabeat marketing strategy?**
+
+These trends can help Bellabeat marketing strategy by applying them to the Bellabeat app and improving parts of the app. I will give my recommendations to improve the Bellabeat app as it is the main product that all customers interface with. The Bellabeat app tracks user activity, sleep, stress, menstrual cycle, and mindfulness habits.
 
 Activity:
 
-Looking at "Calories Burned vs Distance Traveled at Various Intensities" and "Calories Burned vs Duration at Various Intensities" all 3 intensity levels initially burn calories at an increasing rate. However, jogging is shown to burn calories at a decreasing rate as the distance or duration increases. Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration, but that is very difficult to realistically maintain. Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
-
-Recommendation: Keep steps data as a useful metric, but do not emphasize it as there is no strong correlation that putting in more steps burns more calories - it depends on the intensity of those steps. Emphasize and track data for walking and sprinting, depending on the user's time constraint. If the user inputs limited time (eg. at work), then recommend performing some short-timed sprints. If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
-
+Keep steps data as a useful metric, but do not emphasize it as there is no strong correlation that putting in more steps burns more calories - it depends on the intensity of those steps. Emphasize and track data for walking and sprinting, depending on the user's time constraint. If the user inputs limited time (eg. at work), then recommend performing some short-timed sprints. If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
 
 Sleep:
 
-Looking at "Did Users Have Trouble Falling Asleep?" plot, most users fell asleep within 1 hour of being in bed. There are a couple instances in which users could not sleep for more than 1 hour, but are quite few compared to those who slept within an hour. Because of this, there is no need to add any sleep aids.
+There is no need to add any sleep aids.
 
 Stress:
 
-Looking at "Median Hours Slept For Each Day of the Week," Wednesday is the 2nd most hours slept day of the week. Wednesday is also known as "Hump Day" a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
-
-Recommendations: Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
+Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
 
 Menstrual cycles:
 
@@ -1115,18 +1112,7 @@ The Fitbit data did not contain any information regarding menstrual cycles, so I
 
 Mindfulness habits:
 
-
-Looking at "Median Steps Taken For Each Day of the Week," "Median Distance Traveled For Each Day of the Week," and "Median Calories Burned For Each Day of the Week" plots, Sundays are the least active day and Saturdays are the most active day for most users. Also "Median Hours Slept For Each Day of the Week" shows that users sleep more consistently on the weekdays than on the weekends.
-
-Recommendations:
-
-Encourage users to exercise on Sundays with reminder notifications.
-
-Encourage users to keep exercising on Saturdays with a scorecard and giving out rewards to users who keep it up consecutive weeks.
-
-Track sleep and aggregate them for weekdays vs weekends and send reminder notifications that it is ideal to have a consistent sleep schedule.
-
-
+Encourage users to exercise on Sundays with reminder notifications. Encourage users to keep exercising on Saturdays with a scorecard and giving out rewards to users who keep it up throughout consecutive weeks. Track sleep and aggregate them for weekdays vs weekends and send reminder notifications that it is ideal to have a consistent sleep schedule.
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -1135,11 +1121,29 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 
 **6. Your top high-level content recommendations based on your analysis**
 
-Improve 
+**Main Question 3. How could these trends help influence Bellabeat marketing strategy?**
 
+- Apply knowledge from trends to the Bellabeat app and improve parts of the app because it is the main product that all customers interface with.
+- Improve the app's activity, sleep, stress, and mindfulness habits.
 
+Recommendations:
 
-
-
+- Activity:
+  - Keep steps data as a useful metric, but do not emphasize it.
+    - There is no strong correlation that putting in more steps burns more calories.
+    - Depends on the intensity of those steps. 
+  - Emphasize and track data for walking and sprinting, depending on the user's time constraint. 
+    - If the user inputs a limited time (eg. at work), then recommend performing some short-timed sprints. 
+    - If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
+- Sleep:
+  - There is no need to add any sleep aids.
+- Stress:
+  - Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
+- Mindfulness habits:
+  - Encourage users to exercise on Sundays with reminder notifications. 
+  - Encourage users to keep exercising on Saturdays with a scorecard.
+    - Give out rewards to users who stay consistent throughout consecutive weeks. 
+  - Track sleep data and aggregate them as weekdays vs weekends.
+    - Send reminder notifications that it is ideal to have a consistent sleep schedule throughout the entire week.
 
 </div>
