@@ -3,7 +3,7 @@
 
 ## 1. Introduction
 
-As part of the Google Data Analytics Program, I am tasked with completing a Capstone case study. The following information is part of the "Share" section of the project in which I present my findings to the stakeholders. I will be presenting the high-level information of each section's deliverable.
+As part of the Google Data Analytics Program, I am tasked with completing a Capstone case study. The following information is part of the "Share" section of the project in which I present my findings to the stakeholders. I will be presenting each section's deliverable (ie. the conclusions of each section).
 
 The complete project, with code and analysis, can be found in the "capstone_project.Rmd" file.
 
