@@ -186,12 +186,16 @@ These trends:
 
 ## 7. Recommendations
 
+**6. Your top high-level content recommendations based on your analysis**
+
 **Main Question 3. How could these trends help influence Bellabeat marketing strategy?**
 
-- Apply knowledge from trends to the Bellabeat app and improve parts of the app because it is the main product that all customers interface with.
-- Improve the app's activity, sleep, stress, and mindfulness habits.
+- Guide the Bellabeat app with new features to add.
+- Market as a one of a kind fitness app that not only tracks general health and habits data, but also provides ways to improve overall health and solidify better habits, supported up by real data.
 
 Recommendations:
+
+> Caveat: The Fitbit data has poor credibility so trends may not be accurate. However, they provide a general framework for the following  recommendations to be added as new features to the Bellabeat app. Then a subsequent data study can be performed using the data gathered by the Bellabeat app in order to tweak the features to align with Bellabeat customers.
 
 - Activity:
   - Keep steps data as a useful metric, but do not emphasize it.
