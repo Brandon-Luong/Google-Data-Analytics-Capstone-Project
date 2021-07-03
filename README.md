@@ -90,7 +90,7 @@ It contains 18 csv files, 3 in wide format, rest in long:
 
 - Merged `daily_act` and `daily_sleep` into `merged_df` using an inner join.
 
-## 5. Analysis
+## 5. Data Analysis
 
 Drop columns:
 
@@ -114,8 +114,6 @@ Add columns:
   - Convert total_minutes_asleep to hours slept.
 - in_bed_hours
   - Convert total_time_in_bed to hours in bed.
-  
-Now to answer the first main question of the analysis:
 
 **Main Question 1. What are some trends in smart device usage?**
 
@@ -142,14 +140,79 @@ Trends:
 
 ![](Presentation_Pictures/distance_per_day.png)
 
+![](Presentation_Pictures/calories_per_day.png)
 
+- Sundays are the least active day.
+- Saturdays are the most active day.
 
-Looking at "Median Steps Taken For Each Day of the Week," "Median Distance Traveled For Each Day of the Week," and "Median Calories Burned For Each Day of the Week" plots, Sundays are the least active day and Saturdays are the most active day for most users. 
+![](Presentation_Pictures/sleep_per_day.png)
 
-Looking at "Median Hours Slept For Each Day of the Week," Wednesday is the 2nd most hours slept day of the week. Wednesday is also known as "Hump Day" a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
+- Wednesday is the 2nd most hours slept day of the week. 
+- It is also known as "Hump Day," a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
 
-"Median Hours Slept For Each Day of the Week" shows that users sleep more consistently on the weekdays than on the weekends.
+- Users sleep more consistently on the weekdays than on the weekends.
+- Ideal to have consistent sleep schedule throughout the entire week.
 
-"Did Users Have Trouble Falling Asleep?" shows that most users fell asleep within 1 hour of being in bed. There are a couple instances in which users could not sleep for more than 1 hour but are quite few compared to those who slept within an hour.
+![](Presentation_Pictures/no_sleep_issues.png)
 
-Looking at "Calories Burned vs Distance Traveled at Various Intensities" and "Calories Burned vs Duration at Various Intensities" all 3 intensity levels initially burn calories at an increasing rate. However, jogging is shown to burn calories at a decreasing rate as the distance or duration increases. Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration, but that is very difficult to realistically maintain; so, sprinting should be kept at short distances and duration. Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
+- Most users fell asleep within 1 hour of being in bed. 
+- A couple instances in which users could not sleep for more than 1 hour but are quite few.
+
+![](Presentation_Pictures/cal_intensity_dist.png)
+
+![](Presentation_Pictures/cal_intensity_duration.png)
+
+- All 3 intensity levels initially burn calories at an increasing rate. 
+- Jogging is shown to burn calories at a decreasing rate as the distance or duration increases. 
+- Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration.
+  - Very difficult to realistically maintain.
+  - Sprinting should be kept at short distances and duration.
+- Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
+
+**Main Question 2. How could these trends apply to Bellabeat customers?**
+
+Most Bellabeat customers are:
+
+- Women
+- Conscious or interested about their health and habits
+- Want to improve their health and lifestyle
+- Familiar with smart devices
+
+These trends:
+
+- Show common habits.
+- Explain a way to improve one's lifestyle.
+- Were extrapolated from smart device data.
+
+## 7. Recommendations
+
+**Main Question 3. How could these trends help influence Bellabeat marketing strategy?**
+
+- Apply knowledge from trends to the Bellabeat app and improve parts of the app because it is the main product that all customers interface with.
+- Improve the app's activity, sleep, stress, and mindfulness habits.
+
+Recommendations:
+
+- Activity:
+  - Keep steps data as a useful metric, but do not emphasize it.
+    - There is no strong correlation that putting in more steps burns more calories.
+    - Depends on the intensity of those steps. 
+  - Emphasize and track data for walking and sprinting, depending on the user's time constraint. 
+    - If the user inputs a limited time (eg. at work), then recommend performing some short-timed sprints. 
+    - If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
+- Sleep:
+  - There is no need to add any sleep aids.
+- Stress:
+  - Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
+- Mindfulness habits:
+  - Encourage users to exercise on Sundays with reminder notifications. 
+  - Encourage users to keep exercising on Saturdays with a scorecard.
+    - Give out rewards to users who stay consistent throughout consecutive weeks. 
+  - Track sleep data and aggregate them as weekdays vs weekends.
+    - Send reminder notifications that it is ideal to have a consistent sleep schedule throughout the entire week.
+
+## 8. Closing Thoughts
+
+Thank you so much for taking the time to read through this. Again, this is only the deliverables (ie. conclusions) of each section. "capstone_project.Rmd" file contains all the code and full analysis for this project.
+
+The case study was much more difficult than the rest of the Google Data Analytics courses, but I'm so glad I stuck with it and finished it! Working through a case study project taught me so much more than just watching the lectures and taking the quizzes. I'm looking forward to my next project!
