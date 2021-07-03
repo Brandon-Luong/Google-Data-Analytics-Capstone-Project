@@ -138,9 +138,9 @@ Trends:
 
 ## 6. Key Findings
 
-![](steps_per_day.png)
+![](Presentation_Pictures/steps_per_day.png)
 
-![](distance_per_day.png)
+![](Presentation_Pictures/distance_per_day.png)
 
 
 
