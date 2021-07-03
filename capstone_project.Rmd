@@ -14,6 +14,8 @@ As part of the Google Data Analytics Program, I am tasked with completing a Caps
 
 I am part of the marketing analytics team at Bellabeat, a high-tech manufacturer of health-focused products for women. Bellabeat is a small successful company but has the potential for growth in the global smart device market. Urška Sršen believes that analyzing smart fitness data could help with this growth and unlock new opportunities for the company.
 
+Bellabeat Mission Statement: Empower women with knowledge about their own health and habits by collecting data on activity, sleep, stress, and reproductive health.
+
 The Bellabeat Products:
 
 - Bellabeat app: The Bellabeat app provides users with health data related to their activity, sleep, stress, menstrual cycle, and mindfulness habits. This data can help users better understand their current habits and make healthy decisions. The Bellabeat app connects to their line of smart wellness products.
@@ -836,6 +838,8 @@ Add columns:
 - in_bed_hours
   - Convert total_time_in_bed to hours in bed.
 
+**Main Question 1. What are some trends in smart device usage?**
+
 Trends:
 
 - Sunday is the least active day.
@@ -854,6 +858,7 @@ Trends:
   - in_bed_hours about the same as sleep_hours.
   
 - Walking burns more calories than jogging or sprinting when performed for a longer duration or farther distance.
+
 </div>
 
 # Share
@@ -954,7 +959,8 @@ sleep_per_day_plot
 # Hours slept vs hours in bed
 bed_sleep_plot <- bed_sleep_plot +
   # Labels
-  labs(title = "Hours Slept vs Hours in Bed",
+  labs(title = "Did Users Have Trouble Falling Asleep?",
+       subtitle = "Hours slept vs hours in bed",
        x = "Hours in Bed",
        y = "Hours Slept") +
   # Annotate cannot sleep by 1 hour
@@ -977,7 +983,7 @@ walk_dist_plot <- walk_dist_plot +
 
 ((sprint_dist_plot | jog_dist_plot) / walk_dist_plot) +
   plot_annotation(title="Calories Burned vs Distance Traveled at Various Intensities",
-                  subtitle="Note: Sprints are generally only for short distances")
+                  subtitle="Note: High energy sprints are difficult to maintain for long distances")
 ```
 
 ```{r}
@@ -992,8 +998,41 @@ walk_min_plot <- walk_min_plot +
 
 ((sprint_min_plot | jog_min_plot) / walk_min_plot) +
   plot_annotation(title="Calories Burned vs Duration at Various Intensities",
-                  subtitle="Note: Sprints are generally only for short duration")
+                  subtitle="Note: High energy sprints are difficult to maintain for long duration")
 ```
+
+The visualizations are cleaned and ready to be presented. What do these plots tell about the Fitbit users' health and habits?
+
+Looking at "Median Steps Taken For Each Day of the Week," "Median Distance Traveled For Each Day of the Week," and "Median Calories Burned For Each Day of the Week" plots, Sundays are the least active day and Saturdays are the most active day for most users. 
+
+Looking at "Median Hours Slept For Each Day of the Week," Wednesday is the 2nd most hours slept day of the week. Wednesday is also known as "Hump Day" a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
+
+"Median Hours Slept For Each Day of the Week" shows that users sleep more consistently on the weekdays than on the weekends.
+
+"Did Users Have Trouble Falling Asleep?" shows that most users fell asleep within 1 hour of being in bed. There are a couple instances in which users could not sleep for more than 1 hour but are quite few compared to those who slept within an hour.
+
+Looking at "Calories Burned vs Distance Traveled at Various Intensities" and "Calories Burned vs Duration at Various Intensities" all 3 intensity levels initially burn calories at an increasing rate. However, jogging is shown to burn calories at a decreasing rate as the distance or duration increases. Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration, but that is very difficult to realistically maintain; so, sprinting should be kept at short distances and duration. Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
+
+I will now answer the second main question:
+
+**2. How could these trends apply to Bellabeat customers?**
+
+Bellabeat is a high-tech company that manufactures health-focused smart products for women. Its mission statement is to empower women with knowledge about their own health and habits by collecting data on activity, sleep, stress, and reproductive health.
+
+I conclude that most Bellabeat customers are:
+
+- Women
+- Conscious or interested about their health and habits
+- Want to improve their health and lifestyle
+- Familiar with smart devices
+
+So although these are Fitbit specific trends, Fitbit is not so different from Bellabeat and most likely share some of the same clientele. 
+
+These trends:
+
+- Show common habits.
+- Explain a way to improve one's lifestyle.
+- Were extrapolated from smart device data.
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -1006,10 +1045,101 @@ See above for supporting visualizations.
 
 Key Findings:
 
-- Sunday is the least active day.
-- Saturday is the most active day.
-- Wednesday has the 2nd most hours slept.
-- Users slept more consistently on the weekdays and less consistently on the weekends.
-- Users did not have any trouble sleeping.
-- Walking burns more calories than jogging or sprinting when performed for a longer duration or farther distance.
+- "Median Steps Taken For Each Day of the Week," "Median Distance Traveled For Each Day of the Week," and "Median Calories Burned For Each Day of the Week" plots:
+  - Sundays are the least active day.
+  - Saturdays are the most active day.
+
+- "Median Hours Slept For Each Day of the Week":
+  - Wednesday is the 2nd most hours slept day of the week. 
+  - It is also known as "Hump Day," a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
+
+- "Median Hours Slept For Each Day of the Week":
+  - Users sleep more consistently on the weekdays than on the weekends.
+  - Ideal to have consistent sleep schedule throughout the entire week.
+
+- "Did Users Have Trouble Falling Asleep?":
+  - Most users fell asleep within 1 hour of being in bed. 
+  - A couple instances in which users could not sleep for more than 1 hour but are quite few.
+
+- "Calories Burned vs Distance Traveled at Various Intensities" and "Calories Burned vs Duration at Various Intensities":
+  - All 3 intensity levels initially burn calories at an increasing rate. 
+  - Jogging is shown to burn calories at a decreasing rate as the distance or duration increases. 
+  - Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration.
+    - Very difficult to realistically maintain.
+    - Sprinting should be kept at short distances and duration.
+  - Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
+
+**Main Question 2. How could these trends apply to Bellabeat customers?**
+
+Most Bellabeat customers are:
+
+- Women
+- Conscious or interested about their health and habits
+- Want to improve their health and lifestyle
+- Familiar with smart devices
+
+These trends:
+
+- Show common habits.
+- Explain a way to improve one's lifestyle.
+- Were extrapolated from smart device data.
+
+</div>
+
+# Act
+
+Now that I have presented my findings and how they relate to Bellabeat customers, I will give my recommendations to improve the Bellabeat app as it is the main product that all customers interface with. The Bellabeat app tracks user activity, sleep, stress, menstrual cycle, and mindfulness habits.
+
+The Fitbit data did not contain any information regarding menstrual cycles, so I have no recommendations for that particular subject.
+
+Activity:
+
+Looking at "Calories Burned vs Distance Traveled at Various Intensities" and "Calories Burned vs Duration at Various Intensities" all 3 intensity levels initially burn calories at an increasing rate. However, jogging is shown to burn calories at a decreasing rate as the distance or duration increases. Sprinting does burn calories at an increasing rate only if it is performed for a long enough distance or duration, but that is very difficult to realistically maintain. Walking is the only intensity shown to burn calories at an increasing rate as the distance or duration increases.
+
+Recommendation: Keep steps data as a useful metric, but do not emphasize it as there is no strong correlation that putting in more steps burns more calories - it depends on the intensity of those steps. Emphasize and track data for walking and sprinting, depending on the user's time constraint. If the user inputs limited time (eg. at work), then recommend performing some short-timed sprints. If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
+
+
+Sleep:
+
+Looking at "Did Users Have Trouble Falling Asleep?" plot, most users fell asleep within 1 hour of being in bed. There are a couple instances in which users could not sleep for more than 1 hour, but are quite few compared to those who slept within an hour. Because of this, there is no need to add any sleep aids.
+
+Stress:
+
+Looking at "Median Hours Slept For Each Day of the Week," Wednesday is the 2nd most hours slept day of the week. Wednesday is also known as "Hump Day" a reference to a camel's hump in which Wednesday is typically the most stressful day and one has to climb this hill (hump) to get through the work week.
+
+Recommendations: Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
+
+Menstrual cycles:
+
+The Fitbit data did not contain any information regarding menstrual cycles, so I have no recommendations for that particular subject.
+
+Mindfulness habits:
+
+
+Looking at "Median Steps Taken For Each Day of the Week," "Median Distance Traveled For Each Day of the Week," and "Median Calories Burned For Each Day of the Week" plots, Sundays are the least active day and Saturdays are the most active day for most users. Also "Median Hours Slept For Each Day of the Week" shows that users sleep more consistently on the weekdays than on the weekends.
+
+Recommendations:
+
+Encourage users to exercise on Sundays with reminder notifications.
+
+Encourage users to keep exercising on Saturdays with a scorecard and giving out rewards to users who keep it up consecutive weeks.
+
+Track sleep and aggregate them for weekdays vs weekends and send reminder notifications that it is ideal to have a consistent sleep schedule.
+
+
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+**6. Your top high-level content recommendations based on your analysis**
+
+Improve 
+
+
+
+
+
+
 </div>
