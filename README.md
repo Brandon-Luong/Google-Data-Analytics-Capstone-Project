@@ -191,7 +191,7 @@ These trends:
 **Main Question 3. How could these trends help influence Bellabeat marketing strategy?**
 
 - Guide the Bellabeat app with new features to add.
-- Market as a one of a kind fitness app that not only tracks general health and habits data, but also provides ways to improve overall health and solidify better habits, supported up by real data.
+- Market as a one of a kind fitness app that not only tracks general health and habits data, but also provides ways to improve overall health and solidify better habits, supported by real data.
 
 Recommendations:
 
