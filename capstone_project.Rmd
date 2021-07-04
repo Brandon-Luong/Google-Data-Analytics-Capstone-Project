@@ -1132,6 +1132,7 @@ Recommendations:
 
 > Caveat: The Fitbit data has poor credibility so trends may not be accurate. However, they provide a general framework for the following  recommendations to be added as new features to the Bellabeat app. Then a subsequent data study can be performed using the data gathered by the Bellabeat app in order to tweak the features to align with Bellabeat customers.
 
+1. Implement new features based on Fitbit data trends.
 - Activity:
   - Keep steps data as a useful metric, but do not emphasize it.
     - There is no strong correlation that putting in more steps burns more calories.
@@ -1149,5 +1150,8 @@ Recommendations:
     - Give out rewards to users who stay consistent throughout consecutive weeks. 
   - Track sleep data and aggregate them as weekdays vs weekends.
     - Send reminder notifications that it is ideal to have a consistent sleep schedule throughout the entire week.
+2. Market Bellabeat app as a one-of-a-kind fitness app that has all the new features that not only track data but also help you improve your overall health and habits.
+3. Collect data provided by this new framework.
+4. Conduct a subsequent data study on the more up-to-date data based on Bellabeat customers to give more accurate recommendations.
 
 </div>
