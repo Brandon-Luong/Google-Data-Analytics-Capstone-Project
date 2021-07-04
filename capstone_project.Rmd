@@ -1133,23 +1133,23 @@ Recommendations:
 > Caveat: The Fitbit data has poor credibility so trends may not be accurate. However, they provide a general framework for the following  recommendations to be added as new features to the Bellabeat app. Then a subsequent data study can be performed using the data gathered by the Bellabeat app in order to tweak the features to align with Bellabeat customers.
 
 1. Implement new features based on Fitbit data trends.
-- Activity:
-  - Keep steps data as a useful metric, but do not emphasize it.
-    - There is no strong correlation that putting in more steps burns more calories.
-    - Depends on the intensity of those steps. 
-  - Emphasize and track data for walking and sprinting, depending on the user's time constraint. 
-    - If the user inputs a limited time (eg. at work), then recommend performing some short-timed sprints. 
-    - If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
-- Sleep:
-  - There is no need to add any sleep aids.
-- Stress:
-  - Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
-- Mindfulness habits:
-  - Encourage users to exercise on Sundays with reminder notifications. 
-  - Encourage users to keep exercising on Saturdays with a scorecard.
-    - Give out rewards to users who stay consistent throughout consecutive weeks. 
-  - Track sleep data and aggregate them as weekdays vs weekends.
-    - Send reminder notifications that it is ideal to have a consistent sleep schedule throughout the entire week.
+  - Activity:
+    - Keep steps data as a useful metric, but do not emphasize it.
+      - There is no strong correlation that putting in more steps burns more calories.
+      - Depends on the intensity of those steps. 
+    - Emphasize and track data for walking and sprinting, depending on the user's time constraint. 
+      - If the user inputs a limited time (eg. at work), then recommend performing some short-timed sprints. 
+      - If the user inputs a lot of free time (eg. at home on the weekend), then recommend taking a long walk.
+  - Sleep:
+    - There is no need to add any sleep aids.
+  - Stress:
+    - Throughout Wednesday, send words of affirmation notifications to users to help them de-stress and keep pushing forward.
+  - Mindfulness habits:
+    - Encourage users to exercise on Sundays with reminder notifications. 
+    - Encourage users to keep exercising on Saturdays with a scorecard.
+      - Give out rewards to users who stay consistent throughout consecutive weeks. 
+    - Track sleep data and aggregate them as weekdays vs weekends.
+      - Send reminder notifications that it is ideal to have a consistent sleep schedule throughout the entire week.
 2. Market Bellabeat app as a one-of-a-kind fitness app that has all the new features that not only track data but also help you improve your overall health and habits.
 3. Collect data provided by this new framework.
 4. Conduct a subsequent data study on the more up-to-date data based on Bellabeat customers to give more accurate recommendations.
